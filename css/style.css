@@ -108,6 +108,23 @@ img{
     margin:0 auto;
     width: 100%;
 }
+.title{
+    color:var(--brown);
+    text-align: center;
+}
+.inner{
+    padding:6rem 0;
+}
+.line{
+    height: 1px;
+    width: 900px;
+    background-color: var(--gray);
+}
+.main{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 /*header*/
 .header__inner{
     padding:2rem 4rem;
