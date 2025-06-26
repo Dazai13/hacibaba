@@ -1,0 +1,219 @@
+@font-face {
+  font-family: 'Cuprum';
+  src: url('/fonts/Cuprum.ttf');
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Stetica';
+  src: url('/fonts/Stetica.ttf');
+  font-style: normal;
+  font-display: swap;
+}
+:root{
+    --brown:#493521;
+    --red:#C72023;
+    --black:#121212;
+    --beige:#F8EAD2;
+    --gray:#7B7B7B;
+    --cream:#F9F5EF;
+    --white:#F9F5EF;
+    font-size: 62.5%;
+    --main-font: 'Cuprum', sans-serif;
+    --second-font:'Stetica', sans-serif;   
+    --h1-size:6.4rem;
+    --h1-height:7.2rem;
+    --h1-weight:bold;
+    --h2-size:4.8rem;
+    --h2-height:5.5rem;
+    --h2-weight:bold;
+    --h3-size:3.6rem;
+    --h3-height:2.4rem;
+    --h3-weight:900;
+    --h4-size:2.8rem;
+    --h4-height:3.2rem;
+    --h4-weight:bold;
+    --main-size:1.6rem;
+    --main-height:2.2rem;
+    --main-weight:400;
+    --menu-size:1.6rem;
+    --menu-height:2.4rem;
+    --menu-weight:500;
+    --footer-size:1.8rem;
+    --footer-height:2.5rem;
+    --footer-weight:400;
+}
+*{
+    margin:0;
+    padding:0;
+}
+h1{
+    font-size: var(--h1-size);
+    font-family: var(--main-font);
+    font-weight: var(--h1-weight);
+    line-height: var(--h1-height);
+}
+h2{
+    font-size: var(--h2-size);
+    font-family: var(--main-font);
+    font-weight: var(--h2-weight);
+    line-height: var(--h2-height);
+}
+h3{
+    font-size: var(--h3-size);
+    font-family: var(--second-font);
+    font-weight: var(--h3-weight);
+    line-height: var(--h3-height);
+}
+h4{
+    font-size: var(--h4-size);
+    font-family: var(--main-font);
+    font-weight: var(--h4-weight);
+    line-height: var(--h4-height);
+}
+p{
+    font-size: var(--main-size);
+    font-family: var(--second-font);
+    font-weight: var(--main-weight);
+    line-height: var(--main-height);
+}
+.menu-header{
+    font-size: var(--menu-size);
+    font-family: var(--second-font);
+    font-weight: var(--menu-weight);
+    line-height: var(--menu-height);
+}
+.contact-footer{
+    font-size: var(--footer-size);
+    font-family: var(--second-font);
+    font-weight: var(--footer-weight);
+    line-height: var(--footer-height);
+}
+h1,h2,h3,h4,p,.menu-header,.contact-footer{
+    color:var(--black);
+}
+body{
+    background: var(--beige);
+}
+svg{
+    width: 2.5rem;
+    height: 2.5rem;
+}
+img{
+    width: 100%;
+    height: auto;
+}
+.container{
+    max-width: 1440px;
+    margin:0 auto;
+    width: 100%;
+}
+/*header*/
+.header__inner{
+    padding:2rem 4rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+.header__inner-logo{
+    width: 10%;
+}
+.header__innner-menu{
+    display: flex;
+    flex-direction: row;
+    gap:4rem;
+    border:1px solid var(--black);
+    border-radius: 2rem;
+    padding:.8rem 2.25rem;
+}
+.header__inner-link{
+    text-decoration: none;
+    text-transform: uppercase;
+}
+.header__inner-icons{
+    display: flex;
+    flex-direction: row;
+    gap:2rem;
+}
+.header__icon-shop{
+    position: relative;
+}
+.icon__shop-item{
+    position: absolute;
+    right: -21%;
+    top: -16%;
+    background: var(--red);
+    padding: 12% 21%;
+    color:var(--white);
+    font-family: var(--second-font);
+    font-weight: 700;
+    font-size:1.2rem;
+    line-height: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+/*Intro*/
+.intro__inner{
+    position: relative;
+}
+.intro__slider-item, .intro__slider-item img{
+    height: 800px;
+}
+.intro__slider-item{
+    position: relative;
+}
+.slider__item-text{
+    position: absolute;
+    z-index: 1000;
+    top:174px;
+    right:0;
+    padding-right: 4rem;
+    text-transform: uppercase;
+    width:46.3rem;
+    text-align: end;
+    gap:2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+}
+.slider__item-text h1{
+    color:var(--white);
+}
+.slider__item-btn{
+    font-family: var(--main-font);
+    font-size:4rem;
+    line-height: 4.6rem;
+    color:var(--white);
+    background: var(--red);
+    border: none;
+    border-radius: 5rem;
+    width: max-content;
+    padding:1.2rem 3rem;
+    font-weight: 700;
+}
+.intro__arrows{
+    position: absolute;
+    z-index: 1001;
+    bottom: 50%;
+    width: 99%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 0 1rem;
+}
+.intro__arrows button svg{
+    width: 2.8rem;
+    height: 2.8rem;
+}
+.intro__arrows button{
+    border: none !important;
+    background: none !important;
+    cursor: pointer;
+}
+/*footer*/
+.footer{
+    background: var(--brown);
+}
