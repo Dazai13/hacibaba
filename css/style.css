@@ -108,12 +108,19 @@ img{
     margin:0 auto;
     width: 100%;
 }
+section{
+    width: 100%;
+}
 .title{
     color:var(--brown);
     text-align: center;
+    margin-bottom: 6rem;
 }
 .inner{
     padding:6rem 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 .line{
     height: 1px;
@@ -229,6 +236,85 @@ img{
     border: none !important;
     background: none !important;
     cursor: pointer;
+}
+/*catalog*/
+
+/*sweets*/
+.sweets__wrapper{
+    width: 102rem;
+    display: grid;
+    grid-template-columns: 43rem 43rem;
+    grid-template-rows: 50.2rem 50.2rem;
+    gap:11rem 0;
+    justify-content: space-between;
+}
+.sweet__wrapper-item{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap:3rem;
+}
+.sweets__item-image{
+    border-radius: 3rem;
+}
+/*blog*/
+.blog__card{
+    display: flex;
+    flex-direction: row;
+    gap:3rem;
+}
+.blog__card-image{
+    border-radius: 1rem;
+    height: 20rem;
+    width: auto;
+}
+.blog__card-nav{
+    width: 43%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.blog__card-text{
+    display: flex;
+    flex-direction: column;
+    gap:1.2rem;
+}
+.blog__card-btn{
+    background: none;
+    border: 1px solid var(--black);
+    padding:0.3rem 4.1rem;
+    width: max-content;
+    border-radius: 2rem;
+    font-size:20px;
+    font-family: var(--main-font);
+    font-weight: 700;
+}
+.blog__wrapper-btn{
+    background: none;
+    border: 1px solid var(--black);
+    padding:0.3rem 4.1rem;
+    width: max-content;
+    border-radius: 5rem;
+    display: flex;
+    cursor: pointer;
+    height: 7rem;
+    align-items: center;
+}
+.blog__wrapper{
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto auto;
+    justify-content: space-between;
+    gap: 7rem 0;
+    align-items: end;
+}
+
+/*gallery*/
+.gallery__wrapper{
+    display: grid;
+    grid-template-columns: 32rem 57.4rem 32rem;
+    grid-template-rows: 40rem 40rem;
+        gap: 4rem 10.3rem;
 }
 /*footer*/
 .footer{
