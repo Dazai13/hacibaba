@@ -1,24 +1,24 @@
 @font-face {
   font-family: 'Cuprum';
-  src: url('/fonts/Cuprum.ttf');
+  src: url('fonts/Cuprum.ttf');
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Stetica';
-  src: url('/fonts/Stetica.ttf');
+  src: url('fonts/Stetica.ttf');
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Poppins400';
-  src: url('/fonts/Poppins-Regular.ttf');
+  src: url('fonts/Poppins-Regular.ttf');
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: 'Poppins700';
-  src: url('/fonts/Poppins-Bold.ttf');
+  src: url('fonts/Poppins-Bold.ttf');
   font-style: normal;
   font-display: swap;
 }
