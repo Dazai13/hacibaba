@@ -392,9 +392,6 @@ section{
     width: 100%;
     gap:1rem 0;
 }
-.about__text:nth-child(3){
-    margin-top: 5rem;
-}
 .about__wrapper img{
     width: max-content;
     border-radius: 2rem;
