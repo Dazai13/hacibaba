@@ -380,7 +380,30 @@ section{
     gap: 7rem 0;
     align-items: end;
 }
-
+/*about*/
+.about__inner{
+    padding: 6rem 4rem;
+}
+.about__wrapper{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%;
+    gap:1rem 0;
+}
+.about__text:nth-child(3){
+    margin-top: 5rem;
+}
+.about__wrapper img{
+    width: max-content;
+    border-radius: 2rem;
+}
+.about__text{
+    display: flex;
+    flex-direction: column;
+    gap:2rem;
+}
 /*gallery*/
 .gallery__wrapper{
     display: grid;
