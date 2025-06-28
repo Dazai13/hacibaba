@@ -10,6 +10,18 @@
   font-style: normal;
   font-display: swap;
 }
+@font-face {
+  font-family: 'Poppins400';
+  src: url('/fonts/Poppins-Regular.ttf');
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Poppins700';
+  src: url('/fonts/Poppins-Bold.ttf');
+  font-style: normal;
+  font-display: swap;
+}
 :root{
     --brown:#493521;
     --red:#C72023;
@@ -88,8 +100,9 @@ p{
     font-family: var(--second-font);
     font-weight: var(--footer-weight);
     line-height: var(--footer-height);
+    color:var(--beige)
 }
-h1,h2,h3,h4,p,.menu-header,.contact-footer{
+h1,h2,h3,h4,p,.menu-header{
     color:var(--black);
 }
 body{
@@ -238,7 +251,66 @@ section{
     cursor: pointer;
 }
 /*catalog*/
-
+.catalog__inner{
+    padding:6rem 4rem;
+}
+.catalog__wrapper{
+    display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2rem 0;
+}
+.card{
+    border:1px solid var(--brown);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 32.2rem;
+    height: 54.8rem;
+}
+.card__image{
+    width: 26.5rem;
+    margin-top: 1.3rem;
+    height: 35rem;
+}
+.card__title{
+    font-family:'Poppins700',sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    line-height: 2.2rem;
+    color:var(--brown);
+    margin:.5rem 0;
+    text-align: center;
+}   
+.card__subtitle{
+    font-family: 'Poppins400', sans-serif;
+    text-align: center;
+    font-weight: 400;
+    font-size: 1.4rem;
+    line-height: 2.1rem;
+}
+.card__line{
+    width: 24rem;
+    margin:1.2rem 0 .6rem;
+}
+.card__price{
+    font-size: 1.8rem;
+    font-family: 'Poppins700';
+    line-height: 2.7rem;
+    font-weight: 700;
+}
+.card__btn{
+    padding:.65rem 2.6rem;
+    background: var(--red);
+    color:var(--beige);
+    font-family: 'Poppins700';
+    font-weight: 700;
+    font-size:1.8rem;
+    line-height: 2.7rem;
+    border-radius: 2rem;
+    margin-top: 1.2rem;
+}
 /*sweets*/
 .sweets__wrapper{
     width: 102rem;
@@ -314,9 +386,85 @@ section{
     display: grid;
     grid-template-columns: 32rem 57.4rem 32rem;
     grid-template-rows: 40rem 40rem;
-        gap: 4rem 10.3rem;
+    gap: 4rem 10.3rem;
 }
 /*footer*/
 .footer{
     background: var(--brown);
+}
+.footer__inner{
+    padding:3rem 4rem;
+}
+.footer__nav{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.footer__nav-menu{
+    display: flex;
+    flex-direction: row;
+    gap:3%;
+    width: 48%;
+}
+.footer__menu-main{
+    width: max-content;
+    gap:5rem;
+    display: flex;
+    flex-direction: row;
+}
+.footer__menu-items{
+    display: flex;
+    flex-direction: column;
+    gap:2rem;
+}
+.footer__menu-submain{
+    display: flex;
+    flex-direction: column;
+    gap:1rem;
+}
+.main-link{
+    font-size: 2.8rem;
+    line-height: 3.2rem;
+    font-weight: 700;
+    font-family: var(--main-font);
+    color:var(--beige);
+    text-decoration: none;
+}
+.submenu__link{
+    color:var(--beige);
+    font-size:1.8rem;
+    font-family: var(--second-font);
+    text-decoration: none;
+}
+.footer__nav-contact  h4{
+    color:var(--beige);
+    margin-bottom: 2rem;
+}
+.footer__contact-address{
+    margin-bottom: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap:1rem;
+}
+.footer__social{
+    display: flex;
+    gap:2.2rem;
+    flex-direction: row;
+}
+.social__icon{
+    width: 3rem;
+    height: 3rem;
+}
+.footer__menu-logo img{
+    width: 14rem;
+}
+.footer_notescript{
+    width: 100%;
+    text-align: end;
+    font-size:1.6rem;
+    line-height: 2.2rem;
+    font-family: var(--second-font);
+    color:var(--beige);
+    font-weight: 400;
+    margin-top:3rem;
 }
