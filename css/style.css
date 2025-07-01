@@ -342,6 +342,12 @@ section{
 .sweets__item-image{
     border-radius: 3rem;
 }
+@media (max-width:766px){
+    .catalog__wrapper{
+        flex-direction: column;
+        flex-wrap: nowrap;
+    }
+}
 /*blog*/
 .blog__card{
     display: flex;
