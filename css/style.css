@@ -399,6 +399,21 @@ section{
     gap: 7rem 0;
     align-items: end;
 }
+@media (max-width:1024px){
+    .sweets__wrapper{
+        display: flex;
+        flex-direction: column;
+    }
+    .sweets__item-image{
+        width: 43rem;
+        height: 43rem;
+    }
+}
+@media (max-width:766px) {
+        .sweets__item-image{
+        width: 35rem;
+    }
+}
 /*about*/
 .about__inner{
     padding: 6rem 4rem;
