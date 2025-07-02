@@ -7,7 +7,37 @@ $('.intro__slider').slick({
   prevArrow:'.intro__arrow-prev',
   nextArrow:'.intro__arrow-next',
 });
+function initSlickSlider() {
+  const screenWidth = window.innerWidth;
+  const $gallery = $('.gallery__wrapper');
+  const mobileBreakpoint = 1200;
 
+  if (screenWidth < mobileBreakpoint && !$gallery.hasClass('slick-initialized')) {
+    $gallery.slick({
+      slidesToScroll: 1,
+      slidesToShow:3,
+      infinite:true,
+      centerMode: true,
+      variableWidth: true,
+      arrows: true,
+      autoplay: 5000,
+      prevArrow: '.about__arrow-prev',
+      nextArrow: '.about__arrow-next',
+    });
+  } else if (screenWidth >= mobileBreakpoint && $gallery.hasClass('slick-initialized')) {
+    $gallery.slick('unslick');
+  }
+}
+
+// Инициализация при загрузке
+$(document).ready(function() {
+  initSlickSlider();
+  
+  // Также при изменении размера окна
+  $(window).on('resize', function() {
+    initSlickSlider();
+  });
+});
 document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('click', function(e) {
     let targetElement = e.target.closest('[data-target]');

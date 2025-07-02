@@ -307,12 +307,46 @@
                 <div class="gallery__inner inner">
                     <h2 class="title">ГАЛЕРЕЯ</h2>
                     <div class="gallery__wrapper">
-                        <img src="images/galley__item-1.jpg" alt="" class="gallery__wrapper-item">
-                        <img src="images/galley__item-2.jpg" alt="" class="gallery__wrapper-item">
-                        <img src="images/galley__item-3.jpg" alt="" class="gallery__wrapper-item">
-                        <img src="images/galley__item-4.jpg" alt="" class="gallery__wrapper-item">
-                        <img src="images/galley__item-5.png" alt="" class="gallery__wrapper-item">
-                        <img src="images/galley__item-6.jpg" alt="" class="gallery__wrapper-item">
+                        <picture class="gallery__wrapper-item">
+                            <source media="(min-width: 1201px)" srcset="images/gallery__item-1-1440.jpg">
+                            <source media="(max-width: 1200px)" srcset="images/gallery__item-1-768.png">
+                            <source media="(max-width: 390px)" srcset="images/gallery__item-1-390.jpg">
+                            <img src="images/gallery__item-1-1440.jpg" alt="">
+                        </picture>
+                        <picture class="gallery__wrapper-item">
+                            <source media="(min-width: 1201px)" srcset="images/gallery__item-2-1440.jpg">
+                            <source media="(max-width: 1200px)" srcset="images/gallery__item-2-768.png">
+                            <source media="(max-width: 390px)" srcset="images/gallery__item-2-390.jpg">
+                            <img src="images/gallery__item-2-1440.jpg" alt="">
+                        </picture>
+                        <picture class="gallery__wrapper-item">
+                            <source media="(min-width: 1201px)" srcset="images/gallery__item-3-1440.jpg">
+                            <source media="(max-width: 1200px)" srcset="images/gallery__item-3-768.png">
+                            <source media="(max-width: 390px)" srcset="images/gallery__item-3-390.jpg">
+                            <img src="images/gallery__item-3-1440.jpg" alt="">
+                        </picture>
+                        <picture class="gallery__wrapper-item">
+                            <source media="(min-width: 1201px)" srcset="images/gallery__item-4-1440.jpg">
+                            <source media="(max-width: 1200px)" srcset="images/gallery__item-4-768.png">
+                            <source media="(max-width: 390px)" srcset="images/gallery__item-4-390.jpg">
+                            <img src="images/gallery__item-4-1440.jpg" alt="">
+                        </picture>
+                        <picture class="gallery__wrapper-item">
+                            <source media="(min-width: 1201px)" srcset="images/gallery__item-5-1440.png">
+                            <source media="(max-width: 1200px)" srcset="images/gallery__item-5-768.png">
+                            <source media="(max-width: 390px)" srcset="images/gallery__item-5-390.jpg">
+                            <img src="images/gallery__item-5-1440.png" alt="">
+                        </picture>
+                        <picture class="gallery__wrapper-item">
+                            <source media="(min-width: 1201px)" srcset="images/gallery__item-6-1440.jpg">
+                            <source media="(max-width: 1200px)" srcset="images/gallery__item-6-768.png">
+                            <source media="(max-width: 390px)" srcset="images/gallery__item-6-390.jpg">
+                            <img src="images/gallery__item-6-1440.jpg" alt="">
+                        </picture>
+                    </div>
+                    <div class="about__arrows">
+                        <button class="about__arrow-prev"><svg id="prev"><use xlink:href="images/sprite.svg#prev__arrow-about"></use></svg></button>
+                        <button class="about__arrow-next"><svg id="next"><use xlink:href="images/sprite.svg#next__arrow-about"></use></svg></button>
                     </div>
                 </div>
             </div>
