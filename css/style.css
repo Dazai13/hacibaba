@@ -334,6 +334,12 @@ section{
     border-radius: 2rem;
     margin-top: 1.2rem;
 }
+@media (max-width:766px){
+    .catalog__wrapper{
+        flex-direction: column;
+        flex-wrap: nowrap;
+    }
+}
 /*sweets*/
 .sweets__wrapper{
     width: 102rem;
@@ -352,10 +358,19 @@ section{
 .sweets__item-image{
     border-radius: 3rem;
 }
-@media (max-width:766px){
-    .catalog__wrapper{
+@media (max-width:1024px){
+    .sweets__wrapper{
+        display: flex;
         flex-direction: column;
-        flex-wrap: nowrap;
+    }
+    .sweets__item-image{
+        width: 43rem;
+        height: 43rem;
+    }
+}
+@media (max-width:766px) {
+        .sweets__item-image{
+        width: 35rem;
     }
 }
 /*blog*/
@@ -410,18 +425,32 @@ section{
     align-items: end;
 }
 @media (max-width:1024px){
-    .sweets__wrapper{
+    .blog__wrapper{
         display: flex;
         flex-direction: column;
+        align-items: center;
     }
-    .sweets__item-image{
-        width: 43rem;
-        height: 43rem;
+    .blog__card{
+        width: 60%;
     }
 }
-@media (max-width:766px) {
-        .sweets__item-image{
-        width: 35rem;
+@media (max-width:767px){
+    .blog__wrapper-btn{
+        display: none;
+    }
+    .blog__card{
+        width: 100%;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+        align-items: start;
+    }
+    .blog__card-nav{
+        width: 39%;
+    }
+    .blog__card-image{
+        width: 13.7rem;
+        height: 14.6rem;
     }
 }
 /*about*/
@@ -494,7 +523,6 @@ section{
     .about__arrows{
         height: 5.6rem;
     }
-
     .gallery__wrapper{
         display: flex;
         flex-direction: row;
@@ -508,14 +536,18 @@ section{
         width: 100%;
     }
     .about__arrow-prev,.about__arrow-next{
-        border: none !important;
-        background: none !important;
+        border: none;
+        background: none;
         cursor: pointer;
+        margin: 0 2rem;
     }
     .gallery__wrapper-item{
         width: 33.3rem;
         height: 42.3rem;
         margin-left: 36px;
+    }
+    #gallery .container{
+        max-width: 100vw !important;
     }
 }
 @media (max-width:390px){

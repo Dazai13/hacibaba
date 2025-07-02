@@ -11,7 +11,6 @@ function initSlickSlider() {
   const screenWidth = window.innerWidth;
   const $gallery = $('.gallery__wrapper');
   const mobileBreakpoint = 1200;
-
   if (screenWidth < mobileBreakpoint && !$gallery.hasClass('slick-initialized')) {
     $gallery.slick({
       slidesToScroll: 1,
@@ -28,12 +27,9 @@ function initSlickSlider() {
     $gallery.slick('unslick');
   }
 }
-
-// Инициализация при загрузке
 $(document).ready(function() {
   initSlickSlider();
-  
-  // Также при изменении размера окна
+
   $(window).on('resize', function() {
     initSlickSlider();
   });
@@ -41,20 +37,17 @@ $(document).ready(function() {
 document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('click', function(e) {
     let targetElement = e.target.closest('[data-target]');
-    
     if (targetElement) {
       e.preventDefault();
       const targetId = targetElement.getAttribute('data-target');
       scrollToElement(targetId);
-    }
-    
+    } 
     if (e.target.tagName === 'A' && e.target.getAttribute('href')?.startsWith('#')) {
       e.preventDefault();
       const targetId = e.target.getAttribute('href').substring(1);
       scrollToElement(targetId);
     }
   });
-  
   function scrollToElement(elementId) {
     const element = document.getElementById(elementId);
     if (element) {
@@ -62,14 +55,12 @@ document.addEventListener('DOMContentLoaded', function() {
       const offset = 20;
       const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
       const offsetPosition = elementPosition - headerHeight - offset;
-
       window.scrollTo({
         top: offsetPosition,
         behavior: 'smooth'
       });
     }
   }
-  
   if (window.location.hash) {
     const targetId = window.location.hash.substring(1);
     setTimeout(() => {
@@ -77,33 +68,27 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 100);
   }
 });
-
 function updateLayout() {
   const screenWidth = window.innerWidth;
-  console.log("Ширина экрана:", screenWidth);
-  
-  const mobileContent = document.querySelector('.mobile-content');
-  const tableContent = document.querySelector('.table-content');
-  const desktopContent = document.querySelector('.desktop-content');
-  
-  console.log("Найденные элементы:", { mobileContent, tableContent, desktopContent });
-
+  const allDeviceElements = document.querySelectorAll('[data-device]');
+  allDeviceElements.forEach(el => {
+    el.style.display = 'none';
+  });
   if (screenWidth < 768) {
-    mobileContent.style.display = "flex";
-    tableContent.style.display = "none";
-    desktopContent.style.display = "none";
+    document.querySelectorAll('[data-device="mobile"]').forEach(el => {
+      el.style.display = 'flex';
+    });
   } 
   else if (screenWidth < 1024) {
-    mobileContent.style.display = "none";
-    tableContent.style.display = "flex";
-    desktopContent.style.display = "none";
+    document.querySelectorAll('[data-device="tablet"]').forEach(el => {
+      el.style.display = 'flex';
+    });
   } 
   else {
-    mobileContent.style.display = "none";
-    tableContent.style.display = "none";
-    desktopContent.style.display = "flex";
+    document.querySelectorAll('[data-device="desktop"]').forEach(el => {
+      el.style.display = 'flex';
+    });
   }
 }
-
-window.addEventListener('load', updateLayout);
+updateLayout();
 window.addEventListener('resize', updateLayout);
