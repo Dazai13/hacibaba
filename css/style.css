@@ -22,6 +22,9 @@
   font-style: normal;
   font-display: swap;
 }
+html,body{
+    overflow-x: hidden;
+}
 :root{
     --brown:#493521;
     --red:#C72023;
