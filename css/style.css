@@ -195,7 +195,7 @@ section{
 .header__inner-logo{
     width: 10%;
 }
-.header__innner-menu{
+.header__inner-menu{
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -203,10 +203,12 @@ section{
     -webkit-box-direction: normal;
         -ms-flex-direction: row;
             flex-direction: row;
-    gap:4rem;
+    width: 100rem;
+    justify-content: space-between;
     border:1px solid var(--black);
     border-radius: 2rem;
     padding:.8rem 2.25rem;
+    gap: 1rem;
 }
 .header__inner-link{
     text-decoration: none;
