@@ -47,3 +47,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 100);
   }
 });
+
+function updateLayout() {
+  const screenWidth = window.innerWidth;
+  console.log("Ширина экрана:", screenWidth);
+  
+  const mobileContent = document.querySelector('.mobile-content');
+  const tableContent = document.querySelector('.table-content');
+  const desktopContent = document.querySelector('.desktop-content');
+  
+  console.log("Найденные элементы:", { mobileContent, tableContent, desktopContent });
+
+  if (screenWidth < 768) {
+    mobileContent.style.display = "flex";
+    tableContent.style.display = "none";
+    desktopContent.style.display = "none";
+  } 
+  else if (screenWidth < 1024) {
+    mobileContent.style.display = "none";
+    tableContent.style.display = "flex";
+    desktopContent.style.display = "none";
+  } 
+  else {
+    mobileContent.style.display = "none";
+    tableContent.style.display = "none";
+    desktopContent.style.display = "flex";
+  }
+}
+
+window.addEventListener('load', updateLayout);
+window.addEventListener('resize', updateLayout);
