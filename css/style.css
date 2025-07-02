@@ -281,8 +281,8 @@ section{
     display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 2rem 0;
+  justify-content: center;
+  gap: 2rem 2.1rem;
 }
 .card{
     border:1px solid var(--brown);
@@ -435,6 +435,9 @@ section{
     }
 }
 @media (max-width:767px){
+    .blog__wrapper{
+        gap:6rem 0;
+    }
     .blog__wrapper-btn{
         display: none;
     }
