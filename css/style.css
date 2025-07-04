@@ -24,6 +24,7 @@
 }
 html,body{
     overflow-x: hidden;
+    margin:0 !important;
 }
 :root{
     --brown:#493521;
@@ -91,6 +92,10 @@ p{
     font-family: var(--second-font);
     font-weight: var(--main-weight);
     line-height: var(--main-height);
+}
+a{
+    color:var(--white);
+    text-decoration: none;
 }
 .menu-header{
     font-size: var(--menu-size);
