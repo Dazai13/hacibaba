@@ -16,10 +16,10 @@
                     <div class="mobile-menu">
                         <a href="#about" class="header__inner-link menu-header">О нас</a>
                         <a href="#blog" class="header__inner-link menu-header">Блог</a>
-                        <a href="#sweets" class="header__inner-link menu-header">Рахат-лукум</a>
-                        <a href="#sweets" class="header__inner-link menu-header">Кофе</a>
-                        <a href="#sweets" class="header__inner-link menu-header">Пахлава</a>
-                        <a href="#sweets" class="header__inner-link menu-header">Пишмание</a>
+                        <a href="<?php echo esc_url(get_term_link('рахат-лукум', 'product_cat')); ?>" class="header__inner-link menu-header">Рахат-лукум</a>
+                        <a href="<?php echo esc_url(get_term_link('кофе', 'product_cat')); ?>" class="header__inner-link menu-header">Кофе</a>
+                        <a href="<?php echo esc_url(get_term_link('пахлава', 'product_cat')); ?>" class="header__inner-link menu-header">Пахлава</a>
+                        <a href="<?php echo esc_url(get_term_link('пишмание', 'product_cat')); ?>" class="header__inner-link menu-header">Пишмание</a>
                         <a href="#gallery" class="header__inner-link menu-header">Галерея</a>
                         <a href="#contact" class="header__inner-link menu-header">Контакты</a> 
                     </div>
@@ -28,10 +28,10 @@
                     <a href="/" class="header__inner-link menu-header">Главная</a>
                     <a href="#about" class="header__inner-link menu-header">О нас</a>
                     <a href="#blog" class="header__inner-link menu-header">Блог</a>
-                    <a href="#sweets" class="header__inner-link menu-header">Рахат-лукум</a>
-                    <a href="#sweets" class="header__inner-link menu-header">Кофе</a>
-                    <a href="#sweets" class="header__inner-link menu-header">Пахлава</a>
-                    <a href="#sweets" class="header__inner-link menu-header">Пишмание</a>
+                    <a href="<?php echo esc_url(get_term_link('рахат-лукум', 'product_cat')); ?>" class="header__inner-link menu-header">Рахат-лукум</a>
+                    <a href="<?php echo esc_url(get_term_link('кофе', 'product_cat')); ?>" class="header__inner-link menu-header">Кофе</a>
+                    <a href="<?php echo esc_url(get_term_link('пахлава', 'product_cat')); ?>" class="header__inner-link menu-header">Пахлава</a>
+                    <a href="<?php echo esc_url(get_term_link('пишмание', 'product_cat')); ?>" class="header__inner-link menu-header">Пишмание</a>
                     <a href="#gallery" class="header__inner-link menu-header">Галерея</a>
                     <a href="#contact" class="header__inner-link menu-header">Контакты</a> 
                 </nav>

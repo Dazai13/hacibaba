@@ -1,36 +1,41 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Обработчик для всех навигационных ссылок
-    document.querySelectorAll('.header__inner-menu a').forEach(link => {
+    document.querySelectorAll('.header__inner-menu a, .main-link').forEach(link => {
         link.addEventListener('click', function(e) {
-            // Для обычных ссылок (не якорных) ничего не делаем
-            if (this.getAttribute('href') === '/' || 
-                !(this.hasAttribute('href') || this.hasAttribute('data-scroll-target'))) {
+            const href = this.getAttribute('href');
+            
+            // Пропускаем обычные ссылки (не якорные) и внешние ссылки
+            if (href === '/' || href.startsWith('http') || !href.startsWith('#')) {
                 return;
             }
             
             e.preventDefault();
             
             // Получаем цель прокрутки
-            const targetId = this.getAttribute('href') || this.getAttribute('data-scroll-target');
+            const targetId = href;
             if (!targetId || targetId === '#') return;
             
             // Находим целевой элемент
             const targetElement = document.querySelector(targetId);
             if (targetElement) {
+                // Рассчитываем позицию с учетом возможного фиксированного header'а
+                const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+                const offsetPosition = targetElement.offsetTop - headerHeight;
+                
                 // Плавная прокрутка
                 window.scrollTo({
-                    top: targetElement.offsetTop,
+                    top: offsetPosition,
                     behavior: 'smooth'
                 });
                 
                 // Очищаем URL от якоря
-                history.replaceState(null, null, ' ');
+                history.replaceState(null, null, window.location.pathname);
             }
         });
     });
     
     // Очищаем хеш при загрузке страницы
     if (window.location.hash) {
-        history.replaceState(null, null, ' ');
+        history.replaceState(null, null, window.location.pathname);
     }
 });

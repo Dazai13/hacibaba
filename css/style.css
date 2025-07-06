@@ -576,7 +576,7 @@ section{
     width: auto;
 }
 .blog__card-nav{
-    width: 43%;
+    width: 262px;
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -729,8 +729,15 @@ section{
         -ms-flex-direction: column;
             flex-direction: column;
     gap:2rem;
+    height: max-content;
+}
+.about__text:nth-child(5){
+    margin-top:7rem;
 }
 @media (max-width:1263px) {
+    .about__text:nth-child(5){
+    margin-top:0;
+}
     .about__wrapper{
         -webkit-box-orient: vertical;
         -webkit-box-direction: normal;
