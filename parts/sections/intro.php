@@ -10,7 +10,7 @@
                 </picture>
                 <div class="slider__item-text">
                     <h1>мастер вкуса, вдохновленный<br> традициями</h1>
-                    <button class="slider__item-btn">перейти в каталог</button>
+                    <button class="slider__item-btn" data-scroll-to="#catalog">перейти в каталог</button>
                 </div>
             </div>
             <div class="intro__slider-item">
@@ -22,7 +22,7 @@
                 </picture>
                 <div class="slider__item-text">
                     <h1>мастер вкуса, вдохновленный<br> традициями</h1>
-                    <button class="slider__item-btn">перейти в каталог</button>
+                    <button class="slider__item-btn" data-scroll-to="#catalog">перейти в каталог</button>
                 </div>
             </div>
             <div class="intro__slider-item">
@@ -34,7 +34,7 @@
                 </picture>
                 <div class="slider__item-text">
                     <h1>мастер вкуса, вдохновленный<br> традициями</h1>
-                    <button class="slider__item-btn">перейти в каталог</button>
+                    <button class="slider__item-btn" data-scroll-to="#catalog">перейти в каталог</button>
                 </div>
             </div>
         </div>

@@ -13,6 +13,9 @@
                 <div class="header__inner-logo">
                     <img src="<?php echo get_template_directory_uri(); ?>/images/logo.png" alt="">
                     <svg id="burger"><use xlink:href="<?php echo get_template_directory_uri(); ?>/images/sprite.svg#burger"></use></svg>
+                    <div class="mobile-menu">
+                        
+                    </div>
                 </div>
                 <nav class="header__inner-menu">
                         <a href="/" class="header__inner-link menu-header">Главная</a>
@@ -33,5 +36,8 @@
                     </div>
                 </div>
             </div>
+            <?php
+            include(locate_template('parts/sections/search.php'));
+            ?>
         </div>
     </header>

@@ -7,6 +7,13 @@
                 $args = array(
                     'post_type'      => 'product',
                     'posts_per_page' => 8,
+                    'tax_query'      => array(
+                        array(
+                            'taxonomy' => 'product_cat', // Таксономия категорий товаров
+                            'field'    => 'slug',       // Поле для сравнения (slug или id)
+                            'terms'    => 'рахат-лукум',    // Slug нужной категории
+                        )
+                    )
                 );
                 
                 $loop = new WP_Query($args);

@@ -44,7 +44,7 @@ function initMainSlider() {
 
 function initGallerySlider() {
     var $gallery = $('.gallery__wrapper');
-    var mobileBreakpoint = 1200;
+    var mobileBreakpoint = 1240;
     
     if (!$gallery.length) {
         console.warn('Gallery slider element not found');

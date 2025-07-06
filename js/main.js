@@ -1,7 +1,6 @@
 (function($) {
     'use strict';
 
-    // Добавляем функцию debounce прямо в основной файл
     function debounce(func, wait) {
         var timeout;
         return function() {
@@ -13,29 +12,34 @@
         };
     }
 
-    // Делаем функцию доступной для других модулей
     window.debounce = debounce;
 
-    // Инициализация всех модулей
+    function initSmoothScrolling() {
+        $('[data-scroll-to]').on('click', function(e) {
+            e.preventDefault();
+            var target = $(this).data('scroll-to');
+            var offset = $(this).data('scroll-offset') || 0;
+            
+            if ($(target).length) {
+                $('html, body').stop().animate({
+                    scrollTop: $(target).offset().top - offset
+                }, 800);
+            }
+        });
+    }
+
     function initAll() {
         initSliders();
         initSmoothScrolling();
         initResponsiveElements();
+        
     }
 
-    // Двойная инициализация
     $(document).ready(function() {
-        console.log('DOM ready - initializing modules');
         initAll();
     });
 
     $(window).on('load', function() {
-        console.log('Window loaded - rechecking modules');
         initAll();
     });
-
-    // Логирование версий
-    console.log('jQuery version:', $.fn.jquery);
-    console.log('Slick version:', $.fn.slick ? 'loaded' : 'not loaded');
-
 })(jQuery);

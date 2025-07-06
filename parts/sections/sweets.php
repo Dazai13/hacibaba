@@ -4,19 +4,19 @@
             <h2 class="title">НАШИ СЛАДОСТИ</h2>
             <div class="sweets__wrapper">
                 <div class="sweet__wrapper-item">
-                    <img class="sweets__item-image" src="images/sweets__item-1.jpg" alt="">
+                    <img class="sweets__item-image" src="<?php echo get_template_directory_uri(); ?>/images/sweets__item-1.jpg" alt="">
                     <h3 class="sweets__item-text">Рахат-лукум</h3>
                 </div>
                 <div class="sweet__wrapper-item">
-                    <img class="sweets__item-image" src="images/sweets__item-2.jpg" alt="">
+                    <img class="sweets__item-image" src="<?php echo get_template_directory_uri(); ?>/images/sweets__item-2.jpg" alt="">
                     <h3 class="sweets__item-text">Пишмание</h3>
                 </div>
                 <div class="sweet__wrapper-item">
-                    <img class="sweets__item-image" src="images/sweets__item-3.jpg" alt="">
+                    <img class="sweets__item-image" src="<?php echo get_template_directory_uri(); ?>/images/sweets__item-3.jpg" alt="">
                     <h3 class="sweets__item-text">Пахлава</h3>
                 </div>
                 <div class="sweet__wrapper-item">
-                    <img class="sweets__item-image" src="images/sweets__item-4.jpg" alt="">
+                    <img class="sweets__item-image" src="<?php echo get_template_directory_uri(); ?>/images/sweets__item-4.jpg" alt="">
                     <h3 class="sweets__item-text">Кофе</h3>
                 </div>
             </div>

@@ -1,6 +1,9 @@
 (function($) {
     'use strict';
 
+    const imageBasePath = blogVars.templateUri + '/images/';
+    console.log('Image base path:', imageBasePath); // Проверка пути
+
     // Функция debounce для оптимизации обработки resize
     function debounce(func, wait) {
         let timeout;
@@ -22,20 +25,20 @@
         const blogData = [
             {
                 title: "История рахат-лукума",
-                excerpt: "История рахат-лукума истоки сладкого наследия Востока, уходящие корнями в глубину веков...",
-                image: "<?php echo get_template_directory_uri(); ?>../images/blog__card-image.jpg",
+                excerpt: "История рахат-лукума истоки сладкого наследия...",
+                image: imageBasePath + "blog__card-image.jpg",
                 link: "#"
             },
             {
                 title: "История рахат-лукума",
-                excerpt: "История рахат-лукума истоки сладкого наследия Востока, уходящие корнями в глубину веков...",
-                image: "<?php echo get_template_directory_uri(); ?>../images/blog__card-image.jpg",
+                excerpt: "История рахат-лукума истоки сладкого наследия...",
+                image: imageBasePath + "blog__card-image.jpg",
                 link: "#"
             },
             {
                 title: "История рахат-лукума",
-                excerpt: "История рахат-лукума истоки сладкого наследия Востока, уходящие корнями в глубину веков...",
-                image: "<?php echo get_template_directory_uri(); ?>../images/blog__card-image.jpg",
+                excerpt: "История рахат-лукума истоки сладкого наследия...",
+                image: imageBasePath + "blog__card-image.jpg",
                 link: "#"
             }
         ];

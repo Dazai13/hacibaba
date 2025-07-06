@@ -64,15 +64,76 @@ function my_theme_scripts() {
         false
     );
     wp_enqueue_script(
-        'blog',
-        get_template_directory_uri() . '/js/blog.js',
+        'search',
+        get_template_directory_uri() . '/js/search.js',
         array('jquery', 'slick-js'),
-        filemtime(get_template_directory() . '/js/blog.js'),
+        filemtime(get_template_directory() . '/js/responsive-elements.js'),
         false
     );
+
 }
 add_action('wp_enqueue_scripts', 'my_theme_scripts');
 function mytheme_add_woocommerce_support() {
     add_theme_support('woocommerce');
 }
 add_action('after_setup_theme', 'mytheme_add_woocommerce_support');
+
+function enqueue_blog_scripts() {
+    wp_enqueue_script(
+        'blog-script', 
+        get_template_directory_uri() . '/js/blog.js', 
+        array('jquery'),
+        '1.0', 
+        false
+    );
+    wp_localize_script(
+        'blog-script',
+        'blogVars',
+        array(
+            'templateUri' => get_template_directory_uri(),
+            'postsPageUrl' => get_permalink(get_option('page_for_posts'))
+        )
+    );
+}
+add_action('wp_enqueue_scripts', 'enqueue_blog_scripts');
+
+add_action('wp_ajax_product_search', 'product_search_callback');
+add_action('wp_ajax_nopriv_product_search', 'product_search_callback');
+
+function product_search_callback() {
+    $query = sanitize_text_field($_POST['query']);
+    
+    $args = array(
+        'post_type' => 'product',
+        'posts_per_page' => 10,
+        's' => $query,
+        'meta_query' => array(
+            array(
+                'key' => '_stock_status',
+                'value' => 'instock'
+            )
+        )
+    );
+    
+    $search_query = new WP_Query($args);
+    $output = '';
+    
+    if ($search_query->have_posts()) {
+        while ($search_query->have_posts()) {
+            $search_query->the_post();
+            $product = wc_get_product(get_the_ID());
+            
+            $output .= '<a href="' . get_permalink() . '" class="search-result-item">';
+            $output .= '<div class="search-result-thumbnail">' . get_the_post_thumbnail(get_the_ID(), 'thumbnail') . '</div>';
+            $output .= '<div class="search-result-content">';
+            $output .= '<h4 class="search-result-title">' . get_the_title() . '</h4>';
+            $output .= '<div class="search-result-price">' . $product->get_price_html() . '</div>';
+            $output .= '</div>';
+            $output .= '</a>';
+        }
+        wp_reset_postdata();
+        wp_send_json_success($output);
+    } else {
+        wp_send_json_error('Ничего не найдено');
+    }
+}

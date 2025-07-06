@@ -4,7 +4,6 @@
             <h2 class="title">БЛОГ</h2>
             <div class="blog__wrapper">
 
-            
             </div>
         </div>
     </div>
