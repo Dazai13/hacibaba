@@ -50,10 +50,10 @@ function my_theme_scripts() {
         false
     );
     wp_enqueue_script(
-        'smooth-scroll',
-        get_template_directory_uri() . '/js/smooth-scroll.js',
-        array('jquery', 'slick-js'),
-        filemtime(get_template_directory() . '/js/smooth-scroll.js'),
+        'data-target',
+        get_template_directory_uri() . '/js/data-target.js',
+        array(),
+        filemtime(get_template_directory() . '/js/data-target.js'),
         false
     );
     wp_enqueue_script(
@@ -67,7 +67,7 @@ function my_theme_scripts() {
         'search',
         get_template_directory_uri() . '/js/search.js',
         array('jquery', 'slick-js'),
-        filemtime(get_template_directory() . '/js/responsive-elements.js'),
+        filemtime(get_template_directory() . '/js/search.js'),
         false
     );
 }
@@ -136,3 +136,10 @@ function product_search_callback() {
         wp_send_json_error('Ничего не найдено');
     }
 }
+
+// Удаление обработки якорных ссылок
+function remove_anchor_links() {
+    wp_dequeue_script('smooth-scroll'); // Если есть скрипт плавной прокрутки
+    remove_action('wp_footer', 'some_smooth_scroll_script'); // Удаление хуков
+}
+add_action('wp_enqueue_scripts', 'remove_anchor_links', 100);

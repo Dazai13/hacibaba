@@ -6,7 +6,7 @@
                         <div class="footer__menu-logo"><img src="<?php echo get_template_directory_uri(); ?>/images/logo.png" alt=""></div>
                         <div class="footer__menu-items">
                             <nav class="footer__menu-main">
-                                <a href="#catalog" class="main-link">Категории</a>
+                                <a href="#sweets" class="main-link">Категории</a>
                                 <a href="#about" class="main-link">О нас</a>
                                 <a href="#blog" class="main-link">Блог</a>
                                 <a href="#gallery" class="main-link">Галерея</a>
@@ -44,7 +44,7 @@
                         <div class="footer__menu-logo"><img src="<?php echo get_template_directory_uri(); ?>/images/logo.png" alt=""></div>
                         <div class="footer__menu-items">
                             <nav class="footer__menu-main">
-                                <a href="#catalog" class="main-link">Категории</a>
+                                <a href="#sweets" class="main-link">Категории</a>
                                 <a href="#about" class="main-link">О нас</a>
                                 <a href="#blog" class="main-link">Блог</a>
                                 <a href="#gallery" class="main-link">Галерея</a>
@@ -89,7 +89,7 @@
                                 <a href="#gallery" class="main-link">Галерея</a>
                             </nav>
                             <nav class="footer__menu-submain">
-                                <a href="#catalog" class="main-link">Категории</a>
+                                <a href="#sweets" class="main-link">Категории</a>
                                 <a href="#sweets" class="submenu__link">Рахат-лукум</a>
                                 <a href="#sweets" class="submenu__link">Пахлава</a>
                                 <a href="#sweets" class="submenu__link">Кофе</a>
