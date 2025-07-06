@@ -70,7 +70,6 @@ function my_theme_scripts() {
         filemtime(get_template_directory() . '/js/responsive-elements.js'),
         false
     );
-
 }
 add_action('wp_enqueue_scripts', 'my_theme_scripts');
 function mytheme_add_woocommerce_support() {
