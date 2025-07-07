@@ -181,3 +181,75 @@ function remove_anchor_links() {
     remove_action('wp_footer', 'some_smooth_scroll_script'); // Удаление хуков
 }
 add_action('wp_enqueue_scripts', 'remove_anchor_links', 100);
+
+add_theme_support('woocommerce');
+
+function enqueue_footer1_scripts() {
+    // Подключаем JS-файл футера
+    wp_enqueue_script(
+        'footer-script', 
+        get_template_directory_uri() . '/js/footer.js', 
+        array('jquery'), // Зависимости (jQuery)
+        null, 
+        false // Подключаем в футере
+    );
+    
+    // Определяем базовый URL для якорных ссылок
+    $is_home = is_front_page() || is_home();
+    $base_url = $is_home ? '' : home_url('/');
+    
+    // Подготавливаем данные для передачи в JS
+    $footer_data = array(
+        'templateUri' => get_template_directory_uri(), // Путь к теме
+        'mainLinks' => array(
+            array(
+                'text' => 'Категории',
+                'href' => $is_home ? '#sweets' : $base_url . '#sweets',
+                'class' => 'main-link'
+            ),
+            array(
+                'text' => 'О нас',
+                'href' => $is_home ? '#about' : $base_url . '#about',
+                'class' => 'main-link'
+            ),
+            array(
+                'text' => 'Блог',
+                'href' => $is_home ? '#blog' : $base_url . '#blog',
+                'class' => 'main-link'
+            ),
+            array(
+                'text' => 'Галерея',
+                'href' => $is_home ? '#gallery' : $base_url . '#gallery',
+                'class' => 'main-link'
+            )
+        ),
+        'subLinks' => array(
+            array(
+                'text' => 'Рахат-лукум',
+                'href' => esc_url(get_term_link('рахат-лукум', 'product_cat'))
+            ),
+            array(
+                'text' => 'Пахлава',
+                'href' => esc_url(get_term_link('пахлава', 'product_cat'))
+            ),
+            array(
+                'text' => 'Кофе',
+                'href' => esc_url(get_term_link('кофе', 'product_cat'))
+            ),
+            array(
+                'text' => 'Пишмание',
+                'href' => esc_url(get_term_link('пишмание', 'product_cat'))
+            )
+        ),
+        'contacts' => array(
+            'phone' => '8 903 522 53 45',
+            'email' => 'email@mail.ru'
+        ),
+        'policyText' => 'Политика конфиденциальности',
+        'socialIcons' => array('whatsapp', 'telegram', 'mail', 'number')
+    );
+    
+    // Локализуем скрипт (передаем данные из PHP в JS)
+    wp_localize_script('footer-script', 'footerVars', $footer_data);
+}
+add_action('wp_enqueue_scripts', 'enqueue_footer1_scripts');

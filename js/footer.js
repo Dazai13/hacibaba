@@ -1,10 +1,12 @@
+
 (function($) {
     'use strict';
 
+    // Получаем путь к изображениям из переданных PHP-данных
     const imageBasePath = footerVars.templateUri + '/images/';
     console.log('Image base path:', imageBasePath);
 
-    // Функция debounce для оптимизации обработки resize
+    // Функция debounce для оптимизации resize
     function debounce(func, wait) {
         let timeout;
         return function() {
@@ -21,26 +23,21 @@
         const $footerInner = $('.footer__inner').first();
         if (!$footerInner.length) return;
 
-        // Данные для футера
+        // Данные для футера (часть берем из footerVars)
         const footerData = {
             logo: imageBasePath + 'logo.png',
-            mainLinks: [
-                { text: 'Категории', href: '#sweets', class: 'main-link' },
-                { text: 'О нас', href: '#about', class: 'main-link' },
-                { text: 'Блог', href: '#blog', class: 'main-link' },
-                { text: 'Галерея', href: '#gallery', class: 'main-link' }
-            ],
-            subLinks: [
-                { text: 'Рахат-лукум', href: "<?php echo esc_url(get_term_link('рахат-лукум', 'product_cat')); ?>", class: 'submenu__link' },
-                { text: 'Пахлава', href: "<?php echo esc_url(get_term_link('пахлава', 'product_cat')); ?>", class: 'submenu__link' },
-                { text: 'Кофе', href: "<?php echo esc_url(get_term_link('кофе', 'product_cat')); ?>", class: 'submenu__link' },
-                { text: 'Пишмание', href: "<?php echo esc_url(get_term_link('пишмание', 'product_cat')); ?>", class: 'submenu__link' }
-            ],
-            contacts: {
-                phone: '8 (800) 111-11-11',
-                email: 'email@mail.ru'
-            },
-            policyText: 'Политика конфиденциальности и обработки персональных данных',
+            mainLinks: footerVars.mainLinks.map(link => ({
+                text: link.text,
+                href: link.href,
+                class: 'main-link'
+            })),
+            subLinks: footerVars.subLinks.map(link => ({
+                text: link.text,
+                href: link.href,
+                class: 'submenu__link'
+            })),
+            contacts: footerVars.contacts,
+            policyText: footerVars.policyText,
             socialIcons: ['whatsapp', 'telegram', 'mail', 'number']
         };
 
@@ -62,7 +59,7 @@
                         <div class="footer__nav-menu">
                             <div class="footer__menu-items">
                                 <nav class="footer__menu-main">
-                                    <div class="footer__menu-logo"><img src="${footerData.logo}" alt=""></div>
+                                    <div class="footer__menu-logo"><a href='/'><img src="${footerData.logo}" alt=""></a></div>
                                     <a href="#about" class="main-link">О нас</a>
                                     <a href="#blog" class="main-link">Блог</a>
                                     <a href="#gallery" class="main-link">Галерея</a>
@@ -94,7 +91,7 @@
             else if (deviceType === 'tablet') {
                 html = `
                     <div class="footer__nav-menu">
-                        <div class="footer__menu-logo"><img src="${footerData.logo}" alt=""></div>
+                        <div class="footer__menu-logo"><a href='/'><img src="${footerData.logo}" alt=""></a></div>
                         <div class="footer__menu-items">
                             <nav class="footer__menu-main">
                                 ${footerData.mainLinks.map(link => `
@@ -130,7 +127,7 @@
                 html = `
                     <div class="footer__nav">
                         <div class="footer__nav-menu">
-                            <div class="footer__menu-logo"><img src="${footerData.logo}" alt=""></div>
+                            <div class="footer__menu-logo"><a href='/'><img src="${footerData.logo}" alt=""></a></div>
                             <div class="footer__menu-items">
                                 <nav class="footer__menu-main">
                                     ${footerData.mainLinks.map(link => `
