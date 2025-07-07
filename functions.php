@@ -71,7 +71,7 @@ function my_theme_scripts() {
         false
     );
         wp_enqueue_script(
-        'search',
+        'popup',
         get_template_directory_uri() . '/js/popup.js',
         array('jquery', 'slick-js'),
         filemtime(get_template_directory() . '/js/popup.js'),

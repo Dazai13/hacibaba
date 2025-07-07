@@ -9,5 +9,5 @@ $product = get_query_var('product');
     <p class="card__subtitle"><?php echo esc_html($product['subtitle']); ?></p>
     <div class="card__line line"></div>
     <p class="card__price"><?php echo $product['price']; ?></p>
-    <a href="<?php echo esc_url($product['add_to_cart']); ?>" class="card__btn">Добавить в корзину</a>
+    <a class="card__btn">Добавить в корзину</a>
 </div>

@@ -1,11 +1,27 @@
 jQuery(document).ready(function($) {
-    // Показать popup через 3 секунды
-    setTimeout(function() {
+    $('a.card__btn').on('click', function(e) {
+        e.preventDefault();
+        var addToCartUrl = $(this).attr('href');
         $('#custom-popup').fadeIn();
-    }, 3000);
+        
+        $.ajax({
+            url: addToCartUrl,
+            method: 'GET',
+            success: function(response) {
+                console.log('Товар добавлен в корзину');
 
-    // Закрыть popup при клике на крестик
-    $('.close').click(function() {
+            },
+            error: function() {
+                console.error('Ошибка добавления в корзину');
+            }
+        });
+    });
+    $('#close-popup').click(function() {
         $('#custom-popup').fadeOut();
+    });
+    $(document).mouseup(function(e) {
+        if (!$('.popup-content').is(e.target) && $('.popup-content').has(e.target).length === 0) {
+            $('#custom-popup').fadeOut();
+        }
     });
 });
