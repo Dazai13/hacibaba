@@ -70,12 +70,24 @@ function my_theme_scripts() {
         filemtime(get_template_directory() . '/js/search.js'),
         false
     );
+        wp_enqueue_script(
+        'search',
+        get_template_directory_uri() . '/js/popup.js',
+        array('jquery', 'slick-js'),
+        filemtime(get_template_directory() . '/js/popup.js'),
+        false
+    );
 }
 add_action('wp_enqueue_scripts', 'my_theme_scripts');
 function mytheme_add_woocommerce_support() {
     add_theme_support('woocommerce');
 }
 add_action('after_setup_theme', 'mytheme_add_woocommerce_support');
+
+add_action( 'after_setup_theme', 'woocommerce_support' );
+function woocommerce_support() {
+    add_theme_support( 'woocommerce' );
+}
 
 function enqueue_blog_scripts() {
     wp_enqueue_script(
@@ -214,12 +226,12 @@ function enqueue_footer1_scripts() {
             ),
             array(
                 'text' => 'Блог',
-                'href' => $is_home ? '#blog' : $base_url . '#blog',
+                'href' => '/blog',
                 'class' => 'main-link'
             ),
             array(
                 'text' => 'Галерея',
-                'href' => $is_home ? '#gallery' : $base_url . '#gallery',
+                'href' => '/gallery',
                 'class' => 'main-link'
             )
         ),
@@ -253,3 +265,65 @@ function enqueue_footer1_scripts() {
     wp_localize_script('footer-script', 'footerVars', $footer_data);
 }
 add_action('wp_enqueue_scripts', 'enqueue_footer1_scripts');
+
+
+add_action('wp_ajax_live_product_search', 'live_product_search');
+add_action('wp_ajax_nopriv_live_product_search', 'live_product_search');
+
+function live_product_search() {
+    $search = isset($_POST['search']) ? sanitize_text_field($_POST['search']) : '';
+    $category_id = isset($_POST['category']) ? intval($_POST['category']) : 0;
+
+    $args = array(
+        'post_type' => 'product',
+        'posts_per_page' => -1,
+        'post_status' => 'publish'
+    );
+
+    if (!empty($search)) {
+        $args['s'] = $search;
+    }
+
+    if ($category_id > 0) {
+        $args['tax_query'] = array(
+            array(
+                'taxonomy' => 'product_cat',
+                'field'    => 'term_id',
+                'terms'    => $category_id,
+            )
+        );
+    }
+
+    $loop = new WP_Query($args);
+
+    ob_start();
+
+    if ($loop->have_posts()) {
+        while ($loop->have_posts()) : $loop->the_post();
+            global $product;
+            $product_image = wp_get_attachment_image_src(get_post_thumbnail_id($product->get_id()), 'full');
+            ?>
+            <div class="card product-item">
+                <a href="<?php echo get_permalink($product->get_id()); ?>">
+                    <?php if ($product_image) : ?>
+                        <img src="<?php echo esc_url($product_image[0]); ?>" class="card__image" alt="<?php echo esc_attr($product->get_name()); ?>">
+                    <?php else : ?>
+                        <img src="<?php echo wc_placeholder_img_src(); ?>" class="card__image" alt="Placeholder">
+                    <?php endif; ?>
+                </a>
+                <p class="card__title"><?php echo esc_html($product->get_name()); ?></p>
+                <p class="card__subtitle"><?php echo esc_html($product->get_short_description()); ?></p>
+                <div class="card__line line"></div>
+                <p class="card__price"><?php echo $product->get_price_html(); ?></p>
+                <a href="<?php echo esc_url($product->add_to_cart_url()); ?>" class="card__btn">Добавить в корзину</a>
+            </div>
+            <?php
+        endwhile;
+    } else {
+        echo '<p class="no-products">' . __('Товары не найдены', 'woocommerce') . '</p>';
+    }
+
+    wp_reset_postdata();
+    echo ob_get_clean();
+    wp_die();
+}

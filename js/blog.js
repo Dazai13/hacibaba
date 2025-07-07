@@ -39,7 +39,7 @@
                 title: "История рахат-лукума",
                 excerpt: "История рахат-лукума истоки сладкого наследия...",
                 image: imageBasePath + "blog__card-image.jpg",
-                link: "/"
+                link: "/blog"
             }
         ];
 
