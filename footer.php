@@ -5,12 +5,10 @@
             </div>
         </div>
     </footer>
-    <div id="custom-popup" class="popup">
-        <div class="popup-content">
-            
-            <p>Это ваш popup-контент!</p>
-            <svg id="close-popup"><use xlink:href="<?php echo get_template_directory_uri(); ?>/images/sprite.svg#popup"></use></svg>
-        </div>
+<div id="custom-popup" class="popup">
+    <div class="popup-content">
     </div>
+</div>
+
 </body>
 </html>

@@ -27,19 +27,21 @@ if ($loop->have_posts()) {
         $product_image = wp_get_attachment_image_src(get_post_thumbnail_id($product->get_id()), 'full');
         ?>
         
-        <div class="card">
-            <a href="<?php echo get_permalink($product->get_id()); ?>">
-                <?php if ($product_image) : ?>
-                    <img src="<?php echo esc_url($product_image[0]); ?>" class="card__image" alt="<?php echo esc_attr($product->get_name()); ?>">
-                <?php else : ?>
-                    <img src="<?php echo wc_placeholder_img_src(); ?>" class="card__image" alt="Placeholder">
-                <?php endif; ?>
-            </a>
+        <div class="card" >
+            <?php if ($product_image) : ?>
+                <img src="<?php echo esc_url($product_image[0]); ?>" class="card__image" alt="<?php echo esc_attr($product->get_name()); ?>">
+            <?php else : ?>
+                <img src="<?php echo wc_placeholder_img_src(); ?>" class="card__image" alt="Placeholder">
+            <?php endif; ?>
             <p class="card__title"><?php echo esc_html($product->get_name()); ?></p>
             <p class="card__subtitle"><?php echo esc_html($product->get_short_description()); ?></p>
             <div class="card__line line"></div>
             <p class="card__price"><?php echo $product->get_price_html(); ?></p>
-            <a href="<?php echo esc_url($product->add_to_cart_url()); ?>" class="card__btn">Добавить в корзину</a>
+            <a href="#" 
+            class="card__btn show-product-popup" 
+            data-product-id="<?php echo esc_attr($product->get_id()); ?>">
+            Добавить в корзину
+            </a>
         </div>
         
     <?php endwhile;

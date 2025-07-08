@@ -85,19 +85,21 @@ get_header('shop');
                             $product_image = wp_get_attachment_image_src(get_post_thumbnail_id($product->get_id()), 'full');
                             ?>
                             
-                            <div class="card product-item">
-                                <a href="<?php echo get_permalink($product->get_id()); ?>">
-                                    <?php if ($product_image) : ?>
-                                        <img src="<?php echo esc_url($product_image[0]); ?>" class="card__image" alt="<?php echo esc_attr($product->get_name()); ?>">
-                                    <?php else : ?>
-                                        <img src="<?php echo wc_placeholder_img_src(); ?>" class="card__image" alt="Placeholder">
-                                    <?php endif; ?>
-                                </a>
+                            <div class="card product-item" >
+                                <?php if ($product_image) : ?>
+                                    <img src="<?php echo esc_url($product_image[0]); ?>" class="card__image" alt="<?php echo esc_attr($product->get_name()); ?>">
+                                <?php else : ?>
+                                    <img src="<?php echo wc_placeholder_img_src(); ?>" class="card__image" alt="Placeholder">
+                                <?php endif; ?>
                                 <p class="card__title"><?php echo esc_html($product->get_name()); ?></p>
                                 <p class="card__subtitle"><?php echo esc_html($product->get_short_description()); ?></p>
                                 <div class="card__line line"></div>
                                 <p class="card__price"><?php echo $product->get_price_html(); ?></p>
-                                <a href="<?php echo esc_url($product->add_to_cart_url()); ?>" class="card__btn">Добавить в корзину</a>
+                                <a href="#" 
+                                class="card__btn show-product-popup" 
+                                data-product-id="<?php echo esc_attr($product->get_id()); ?>">
+                                Добавить в корзину
+                                </a>
                             </div>
                             
                         <?php endwhile;
@@ -124,39 +126,37 @@ get_header('shop');
 </div>
 
 <script>
-jQuery(document).ready(function($) {
-    // Live search functionality
-    $('#live-search-input').on('input', function() {
-        var searchQuery = $(this).val();
-        var categoryId = $('#current-category').val();
-        
-        $.ajax({
-            url: '<?php echo admin_url("admin-ajax.php"); ?>',
-            type: 'POST',
-            data: {
-                action: 'live_product_search',
-                search: searchQuery,
-                category: categoryId
-            },
-            beforeSend: function() {
-                $('#products-container').html('<div class="loading">Поиск товаров...</div>');
-            },
-            success: function(response) {
-                $('#products-container').html(response);
-                updateProductCount();
-            },
-            error: function() {
-                $('#products-container').html('<p>Произошла ошибка при поиске</p>');
-            }
-        });
+// Обработка клика по кнопке "Добавить в корзину"
+$(document).on('click', '.show-product-popup', function(e) {
+    e.preventDefault();
+    var productId = $(this).data('product-id');
+    
+    // Показываем popup
+    $('#custom-popup').show();
+    
+    // Загружаем данные товара через AJAX
+    $.ajax({
+        url: '<?php echo admin_url("admin-ajax.php"); ?>',
+        type: 'POST',
+        data: {
+            action: 'get_product_data',
+            product_id: productId
+        },
+        beforeSend: function() {
+            $('#custom-popup .popup-content').html('<div class="loading">Загрузка товара...</div>');
+        },
+        success: function(response) {
+            $('#custom-popup .popup-content').html(response);
+        },
+        error: function() {
+            $('#custom-popup .popup-content').html('<p>Ошибка загрузки товара</p>');
+        }
     });
+});
 
-    function updateProductCount() {
-        var productCount = $('.product-item').length;
-        var countText = productCount + ' ' + (productCount % 10 === 1 && productCount % 100 !== 11 ? 'товар' : 
-                          productCount % 10 >= 2 && productCount % 10 <= 4 && (productCount % 100 < 10 || productCount % 100 >= 20) ? 'товара' : 'товаров');
-        $('.product-count').text(productCount === 0 ? 'Нет товаров' : countText);
-    }
+// Закрытие popup
+$(document).on('click', '#close-popup, .popup-close', function() {
+    $('#custom-popup').hide();
 });
 </script>
 

@@ -45,10 +45,12 @@
                 </nav>
                 <div class="header__inner-icons">
                     <svg id="search"><use xlink:href="<?php echo get_template_directory_uri(); ?>/images/sprite.svg#search"></use></svg>
-                    <div class="header__icon-shop">
-                        <div class="icon__shop-item">0</div>
+                    <a href="<?php echo wc_get_cart_url(); ?>" class="header__icon-shop">
+                        <div class="icon__shop-item"> 
+                            <?php echo WC()->cart->get_cart_contents_count(); ?>
+                        </div>
                         <svg id="shop"><use xlink:href="<?php echo get_template_directory_uri(); ?>/images/sprite.svg#shop"></use></svg>
-                    </div>
+                    </a>
                 </div>
             </div>
             <?php

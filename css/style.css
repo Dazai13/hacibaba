@@ -11,6 +11,12 @@
   font-display: swap;
 }
 @font-face {
+  font-family: 'SteticaBold';
+  src: url('../fonts/SteticaBold.otf');
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
   font-family: 'Poppins400';
   src: url('../fonts/Poppins-Regular.ttf');
   font-style: normal;
@@ -46,7 +52,8 @@ html,body{
     --white:#F9F5EF;
     font-size: 62.5%;
     --main-font: 'Cuprum', sans-serif;
-    --second-font:'Stetica', sans-serif;   
+    --second-font:'Stetica', sans-serif;
+    --second-bold:'SteticaBold',sans-serif;  
     --h1-size:6.4rem;
     --h1-height:7.2rem;
     --h1-weight:bold;
@@ -88,7 +95,7 @@ h2{
 }
 h3{
     font-size: var(--h3-size);
-    font-family: var(--second-font);
+    font-family: var(--second-bold);
     font-weight: var(--h3-weight);
     line-height: var(--h3-height);
 }
@@ -264,7 +271,7 @@ section{
     background: var(--red);
     padding: 12% 21%;
     color:var(--white);
-    font-family: var(--second-font);
+    font-family: var(--second-bold);
     font-weight: 700;
     font-size:1.2rem;
     line-height: 1.2rem;
@@ -467,7 +474,7 @@ section{
 }
 .card__price{
     font-size: 1.8rem;
-    font-family: 'Poppins700';
+    font-family: 'Poppins700',sans-serif;
     line-height: 2.7rem;
     font-weight: 700;
 }
@@ -475,7 +482,7 @@ section{
     padding:.65rem 2.6rem;
     background: var(--red);
     color:var(--beige);
-    font-family: 'Poppins700';
+    font-family: 'Poppins700',sans-serif;
     font-weight: 700;
     font-size:1.8rem;
     line-height: 2.7rem;
@@ -1118,7 +1125,7 @@ overflow: hidden;
     line-height: 1.6rem;
     font-size:14px;
     font-weight: 400;
-    font-family: 'Stetica';
+    font-family: 'Stetica',sans-serif;
 }
 .search__form input:focus,.search__form input:active{
     outline: 0;
@@ -1147,7 +1154,7 @@ overflow: hidden;
 .search-result-price{
     font-size: 20px;
   font-weight: 700;
-  font-family: 'Stetica',sans-serif;
+  font-family: 'SteticaBold',sans-serif;
 }
 .search-result-content{
     display: flex;
@@ -1289,6 +1296,9 @@ width: 100%;
     padding:50px;
     width: 84.8rem;
     height: 56.7rem;
+    display: flex;
+    flex-direction: row;
+    gap:3rem;   
 }
 .close {
     float: right;
@@ -1325,4 +1335,131 @@ width: 100%;
 #close-popup{
     width: 1.3rem;
     height: 1.3rem;
+    cursor: pointer;
+}
+
+.popup-product-image img{
+    width: 300px;
+}
+
+.popup-product-gallery-exclusive{
+    width: 337px;
+    height: 567px;
+}
+.exclusive-main-image{
+    width: 100%;
+    height: 450px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.current-main-image{
+    height: 100%;
+}
+.product__gallery{
+    height: max-content;
+}
+.exclusive-gallery-thumbs img {
+    width: 100%;
+    height: 107px;
+    object-fit: cover;
+}
+.exclusive-thumb {
+    width: 80px;
+    height:107px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.exclusive-prev, .exclusive-next {
+    position: absolute;
+    background: none;
+    border: none;
+    transform: translateY(-300%);
+    cursor: pointer;
+    z-index: 10;
+    top: 50%;
+}
+.exclusive-gallery-thumbs {
+    display: flex;
+    gap: 10px;
+    overflow: hidden;
+}
+.exclusive-main-image {
+    margin-bottom: 10px;
+}
+
+.popup-product-gallery-exclusive {
+    position: relative;
+    margin-bottom: 20px;
+}
+#image-prev,#image-next{
+    width: 7px;
+    height: 12px;
+}
+.exclusive-prev {
+    left: 10px;
+}
+
+.exclusive-next {
+    right: 10px;
+}
+.product__info{
+    width: 438px;
+}
+.popup-product-title{
+    font-size: 16px;
+    line-height: 22px;
+    font-family: 'Poppins700',sans-serif;
+    font-weight: 700;
+    width: 390px;
+}
+.product-attributes-table{
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap:8px;
+}
+.product__attribute{
+    display: flex;
+    flex-direction: row;
+    gap:6px;
+}
+.product__attribute-value{
+    width: 223px;
+    font-weight: 400;
+    font-family: var(--second-font);
+}
+.product__attribute-name{
+    width: max-content;
+    white-space: nowrap;
+    font-weight: 700;
+    font-family: var(--second-bold);
+}
+.attribute-name{
+    display: flex;
+    flex-direction: row;
+    width: 193px;
+}
+.dotted-line{
+    width: 100%;
+  border-bottom: 2px dotted var(--black);
+  margin-bottom: 7px;
+}
+.product__attribute-name,.product__attribute-value{
+    font-size: 12px;
+    line-height: 22px;
+
+}
+.popup-product-description p{
+    font-family: "Poppins400",sans-serif;
+    font-size:14px;
+    width: 387px;
+    line-height: 22px;
+    margin-top: 40px;
+}
+.single_add_to_cart_button{
+    margin-top: 4rem;
+}
+.woocommerce-message{
+    display: none;
 }

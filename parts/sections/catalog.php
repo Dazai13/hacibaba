@@ -9,9 +9,9 @@
                     'posts_per_page' => 8,
                     'tax_query'      => array(
                         array(
-                            'taxonomy' => 'product_cat', // Таксономия категорий товаров
-                            'field'    => 'slug',       // Поле для сравнения (slug или id)
-                            'terms'    => 'рахат-лукум',    // Slug нужной категории
+                            'taxonomy' => 'product_cat',
+                            'field'    => 'slug',
+                            'terms'    => 'рахат-лукум',
                         )
                     )
                 );
@@ -44,3 +44,30 @@
         </div>
     </div>
 </section>
+
+<script>
+jQuery(document).ready(function($) {
+    $('.card').on('click', function() {
+        var productId = $(this).data('product-id');
+        
+        // AJAX запрос для загрузки данных товара
+        $.ajax({
+            url: '<?php echo admin_url("admin-ajax.php"); ?>',
+            type: 'POST',
+            data: {
+                action: 'load_product_popup',
+                product_id: productId
+            },
+            success: function(response) {
+                $('#custom-popup .popup-content').html(response);
+                $('#custom-popup').fadeIn();
+            }
+        });
+    });
+    
+    // Закрытие попапа
+    $('#close-popup').on('click', function() {
+        $('#custom-popup').fadeOut();
+    });
+});
+</script>

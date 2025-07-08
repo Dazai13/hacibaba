@@ -327,3 +327,47 @@ function live_product_search() {
     echo ob_get_clean();
     wp_die();
 }
+
+
+// Обработчик AJAX запроса для получения данных товара
+add_action('wp_ajax_get_product_data', 'get_product_data');
+add_action('wp_ajax_nopriv_get_product_data', 'get_product_data');
+
+function get_product_data() {
+    $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
+    $product = wc_get_product($product_id);
+    
+    if ($product && is_a($product, 'WC_Product')) {
+        ob_start();
+        // Подключаем шаблон
+        include get_template_directory() . '/product-popup-template.php';
+        echo ob_get_clean();
+    } else {
+        echo '<p>Товар не найден</p>';
+    }
+    
+    wp_die();
+}
+
+// Обработка AJAX запроса для загрузки попапа с товаром
+add_action('wp_ajax_load_product_popup', 'load_product_popup_handler');
+add_action('wp_ajax_nopriv_load_product_popup', 'load_product_popup_handler');
+
+function load_product_popup_handler() {
+    $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
+    $product = wc_get_product($product_id);
+    
+    if ($product && is_a($product, 'WC_Product')) {
+        // Подключаем тот же шаблон
+        include get_template_directory() . '/product-popup-template.php';
+    } else {
+        echo '<p>Товар не найден</p>';
+    }
+    
+    wp_die();
+}
+
+add_filter('woocommerce_add_to_cart_fragments', function ($fragments) {
+    $fragments['.icon__shop-item'] = '<span class="icon__shop-item">' . WC()->cart->get_cart_contents_count() . '</span>';
+    return $fragments;
+});
