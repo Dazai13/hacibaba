@@ -113,62 +113,208 @@ get_header('shop');
         </div>
     </section>
 
-    <section class="additionally">
-        <div class="container">
-            <div class="additionally__innner inner">
-                    <h1 class="additionally__title">ДОПОЛНИТЕЛЬНО</h1>
-                    <h3 class="additionally__subtitle">Уважаемые покупатели! Вы можете дополнительно упаковать любой товар сайта в красивую подарочную упаковку.</h3>
-                    <div class="additionally__wrapper">
-                        <div class="additionally__item">
-                                <img src="">
-                                <p class="card__title"></p>
-                                <p class="card__subtitle"></p>
-                                <div class="card__line line"></div>
-                                <p class="card__price"></p>
-                                <a class="card__btn">Добавить в корзину</a>
+<section class="additionally">
+    <div class="container">
+        <div class="additionally__innner inner">
+            <h1 class="additionally__title">ДОПОЛНИТЕЛЬНО</h1>
+            <h3 class="additionally__subtitle">Уважаемые покупатели! Вы можете дополнительно упаковать любой товар сайта в красивую подарочную упаковку.</h3>
+            <div class="additionally__wrapper">
+                <?php
+                // Получаем товары из категории "Упаковка"
+                $args = array(
+                    'post_type' => 'product',
+                    'posts_per_page' => -1,
+                    'tax_query' => array(
+                        array(
+                            'taxonomy' => 'product_cat',
+                            'field' => 'slug',
+                            'terms' => 'упаковка' // Укажите slug вашей категории "Упаковка"
+                        )
+                    )
+                );
+                
+                $products = new WP_Query($args);
+                
+                if ($products->have_posts()) :
+                    while ($products->have_posts()) : $products->the_post();
+                        global $product;
+                        $product_id = $product->get_id();
+                        $image = wp_get_attachment_image_src(get_post_thumbnail_id($product_id), 'full');
+                        ?>
+                        
+                        <div class="additionally__item" data-product-id="<?php echo esc_attr($product_id); ?>">
+                            <img src="<?php echo esc_url($image[0] ?? get_template_directory_uri() . '/images/placeholder.png'); ?>" alt="<?php the_title_attribute(); ?>">
+                            <p class="card__title"><?php the_title(); ?></p>
+                            
+                            <div class="card__subtitle">
+                                <?php
+                                // Выводим варианты атрибутов для вариативных товаров
+                                if ($product->is_type('variable')) {
+                                    $attributes = $product->get_variation_attributes();
+                                    
+                                    foreach ($attributes as $attribute_name => $options) {
+                                        $attribute_label = wc_attribute_label($attribute_name);
+                                        ?>
+                                        <div class="variation-options">
+                                            <div class="variation-buttons" data-attribute="<?php echo esc_attr($attribute_name); ?>">
+                                                <?php 
+                                                $first_option = true;
+                                                foreach ($options as $option) : 
+                                                    ?>
+                                                    <button 
+                                                        type="button"
+                                                        class="variation-button <?php echo $first_option ? 'active' : ''; ?>"
+                                                        data-value="<?php echo esc_attr($option); ?>"
+                                                    >
+                                                        <?php echo esc_html($option); ?>
+                                                    </button>
+                                                    <?php 
+                                                    $first_option = false;
+                                                endforeach; 
+                                                ?>
+                                            </div>
+                                        </div>
+                                        <?php
+                                    }
+                                }
+                                ?>
+                            </div>
+                            
+                            <div class="card__line line"></div>
+                            <p class="card__price"><?php echo $product->get_price_html(); ?></p>
+                            <a href="#" class="additionally__btn add-to-cart-btn">
+                                Добавить в корзину
+                            </a>
                         </div>
-                    </div>
-                    <p class="additionally__text">Просто добавьте ее в корзину и мы все упакуем!</p>
-
+                        
+                    <?php endwhile;
+                    wp_reset_postdata();
+                else :
+                    echo '<p>Нет товаров в категории "Упаковка"</p>';
+                endif;
+                ?>
             </div>
+            <p class="additionally__text">Просто добавьте ее в корзину и мы все упакуем!</p>
         </div>
-    </section>
-
+    </div>
+</section>
 </div>
-
+<?php get_footer('shop'); ?>
 <script>
-// Обработка клика по кнопке "Добавить в корзину"
-$(document).on('click', '.show-product-popup', function(e) {
-    e.preventDefault();
-    var productId = $(this).data('product-id');
-    
-    // Показываем popup
-    $('#custom-popup').show();
-    
-    // Загружаем данные товара через AJAX
-    $.ajax({
-        url: '<?php echo admin_url("admin-ajax.php"); ?>',
-        type: 'POST',
-        data: {
-            action: 'get_product_data',
-            product_id: productId
-        },
-        beforeSend: function() {
-            $('#custom-popup .popup-content').html('<div class="loading">Загрузка товара...</div>');
-        },
-        success: function(response) {
-            $('#custom-popup .popup-content').html(response);
-        },
-        error: function() {
-            $('#custom-popup .popup-content').html('<p>Ошибка загрузки товара</p>');
-        }
-    });
-});
+jQuery(document).ready(function($) {
 
-// Закрытие popup
-$(document).on('click', '#close-popup, .popup-close', function() {
-    $('#custom-popup').hide();
+    // Обработка выбора вариаций
+    $(document).on('click', '.variation-button', function() {
+        const $button = $(this);
+        const $container = $button.closest('.variation-buttons');
+        $container.find('.variation-button').removeClass('active');
+        $button.addClass('active');
+
+        // Убираем красную рамку, если была
+        $container.css('border', 'none');
+    });
+
+    // Добавление вариативного товара из блока "additionally" без popup
+    $(document).on('click', '.additionally__item .add-to-cart-btn', function(e) {
+        e.preventDefault();
+
+        const $button = $(this);
+        const $productItem = $button.closest('.additionally__item');
+        const productId = $productItem.data('product-id');
+        const variationData = {};
+        let missingAttributes = [];
+
+        // Сбор выбранных атрибутов
+        $productItem.find('.variation-buttons').each(function() {
+            const $active = $(this).find('.variation-button.active');
+            const attributeName = $(this).data('attribute');
+
+            if ($active.length === 0) {
+                missingAttributes.push(attributeName);
+                $(this).css('border', '1px solid red');
+            } else {
+                variationData[`attribute_${attributeName}`] = $active.data('value');
+            }
+        });
+
+        if (missingAttributes.length > 0) {
+            alert('Пожалуйста, выберите: ' + missingAttributes.join(', '));
+            return;
+        }
+
+        $button.prop('disabled', true).text('Добавляем...');
+
+        // Получаем ID вариации по атрибутам
+        $.post(wc_add_to_cart_params.ajax_url, {
+            action: 'find_product_variation',
+            product_id: productId,
+            attributes: variationData
+        }, function(variation_id) {
+            if (variation_id && variation_id > 0) {
+                // Добавление в корзину
+                $.post(wc_add_to_cart_params.ajax_url, {
+                    action: 'woocommerce_ajax_add_to_cart',
+                    product_id: productId,
+                    variation_id: variation_id,
+                    quantity: 1,
+                    attributes: variationData
+                }, function(response) {
+                    if (response && response.fragments) {
+                        $(document.body).trigger('added_to_cart', [response.fragments, response.cart_hash]);
+                        alert('Товар добавлен в корзину!');
+                    } else {
+                        alert('Ошибка добавления в корзину.');
+                    }
+                }).always(function() {
+                    $button.prop('disabled', false).text('Добавить в корзину');
+                });
+            } else {
+                alert('Не удалось найти подходящую вариацию товара');
+                $button.prop('disabled', false).text('Добавить в корзину');
+            }
+        }).fail(function() {
+            alert('Ошибка при поиске вариации');
+            $button.prop('disabled', false).text('Добавить в корзину');
+        });
+    });
+
+    // Показываем popup только для товаров вне блока .additionally__item
+    $(document).on('click', '.show-product-popup', function(e) {
+        if ($(this).closest('.additionally__item').length > 0) {
+            // Это товар из блока "Дополнительно" — ничего не делаем
+            e.preventDefault();
+            return;
+        }
+
+        e.preventDefault();
+
+        const productId = $(this).data('product-id');
+        $('#custom-popup').show();
+
+        $.ajax({
+            url: '<?php echo admin_url("admin-ajax.php"); ?>',
+            type: 'POST',
+            data: {
+                action: 'get_product_data',
+                product_id: productId
+            },
+            beforeSend: function() {
+                $('#custom-popup .popup-content').html('<div class="loading">Загрузка товара...</div>');
+            },
+            success: function(response) {
+                $('#custom-popup .popup-content').html(response);
+            },
+            error: function() {
+                $('#custom-popup .popup-content').html('<p>Ошибка загрузки товара</p>');
+            }
+        });
+    });
+
+    // Закрытие popup
+    $(document).on('click', '#close-popup, .popup-close', function() {
+        $('#custom-popup').hide();
+    });
+
 });
 </script>
 
-<?php get_footer('shop'); ?>

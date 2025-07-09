@@ -395,3 +395,68 @@ function custom_override_checkout_fields($fields) {
     
     return $fields;
 }
+
+// Обеспечиваем корректную обработку вариативных товаров
+add_filter('woocommerce_add_to_cart_validation', 'validate_variation_before_add', 10, 6);
+function validate_variation_before_add($passed, $product_id, $quantity, $variation_id = '', $variations = '', $cart_item_data = []) {
+    // Если товар вариативный, проверяем что вариация указана
+    $product = wc_get_product($product_id);
+    if ($product && $product->is_type('variable') && empty($variation_id)) {
+        wc_add_notice(__('Пожалуйста, выберите все необходимые опции товара.', 'woocommerce'), 'error');
+        return false;
+    }
+    return $passed;
+}
+
+// Улучшаем обработку AJAX-запросов
+add_action('wp_ajax_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart');
+add_action('wp_ajax_nopriv_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart');
+function woocommerce_ajax_add_to_cart() {
+    ob_start();
+    
+    // Проверяем nonce (защита от CSRF)
+    if (!isset($_POST['product_id'])) {
+        wp_send_json_error(['message' => 'Не указан ID товара']);
+    }
+
+    $product_id = apply_filters('woocommerce_add_to_cart_product_id', absint($_POST['product_id']));
+    $quantity = empty($_POST['quantity']) ? 1 : wc_stock_amount(absint($_POST['quantity']));
+    $variation_id = 0;
+    
+    // Если товар вариативный, находим нужную вариацию
+    $product = wc_get_product($product_id);
+    if ($product->is_type('variable')) {
+        $variation_attributes = [];
+        foreach ($_POST as $key => $value) {
+            if (strpos($key, 'attribute_') === 0) {
+                $variation_attributes[sanitize_title(str_replace('attribute_', '', $key))] = sanitize_text_field($value);
+            }
+        }
+        
+        $data_store = WC_Data_Store::load('product');
+        $variation_id = $data_store->find_matching_product_variation($product, $variation_attributes);
+        
+        if (!$variation_id) {
+            wp_send_json_error(['message' => 'Не удалось найти подходящую вариацию']);
+        }
+    }
+    
+    // Добавляем в корзину
+    $cart_item_key = WC()->cart->add_to_cart($product_id, $quantity, $variation_id, $variation_attributes);
+    
+    if ($cart_item_key) {
+        do_action('woocommerce_ajax_added_to_cart', $product_id);
+        
+        // Получаем обновленные фрагменты
+        WC_AJAX::get_refreshed_fragments();
+    } else {
+        $error_message = wc_get_notices('error');
+        wc_clear_notices();
+        
+        if (empty($error_message)) {
+            $error_message = __('Неизвестная ошибка при добавлении в корзину', 'woocommerce');
+        }
+        
+        wp_send_json_error(['message' => is_array($error_message) ? implode(' ', $error_message) : $error_message]);
+    }
+}
