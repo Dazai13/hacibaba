@@ -38,8 +38,76 @@
                     <img src="<?php echo get_template_directory_uri(); ?>/images/gallery__item-19.png" alt="" class="gallery__item">
                     <img src="<?php echo get_template_directory_uri(); ?>/images/gallery__item-20.png" alt="" class="gallery__item">
                 </div>
+                <div class="about__arrows">
+                    <button class="about__arrow-prev"><svg id="prev"><use xlink:href="<?php echo get_template_directory_uri(); ?>/images/sprite.svg#prev__arrow-about"></use></svg></button>
+                    <button class="about__arrow-next"><svg id="next"><use xlink:href="<?php echo get_template_directory_uri(); ?>/images/sprite.svg#next__arrow-about"></use></svg></button>
+                </div>
             </div>
         </div>
     </section>
 </main>
+<script>
+    function initGalleryPageSlider() {
+    var $gallery = $('.gallery__items');
+    var mobileBreakpoint = 767;
+    
+    if (!$gallery.length) {
+        return;
+    }
+
+    var mobileSettings = {
+        slidesToScroll: 1,
+        slidesToShow: 3,
+        infinite: true,
+        centerMode: true,
+        variableWidth: true,
+        arrows: true,
+        autoplay: true,
+        autoplaySpeed: 5000,
+        dots: false,
+        prevArrow: '.about__arrow-prev',
+        nextArrow: '.about__arrow-next'
+    };
+
+    function checkGallerySlider() {
+        if (window.innerWidth < mobileBreakpoint) {
+            if (!$gallery.hasClass('slick-initialized')) {
+                try {
+                    $gallery.slick(mobileSettings);
+                } catch (e) {
+                    console.error('Slick slider initialization error:', e);
+                }
+            }
+        } else {
+            if ($gallery.hasClass('slick-initialized')) {
+                try {
+                    $gallery.slick('unslick');
+                } catch (e) {
+                    console.error('Slick slider destroy error:', e);
+                }
+            }
+        }
+    }
+
+    // Функция debounce для оптимизации обработки resize
+    function debounce(func, wait) {
+        var timeout;
+        return function() {
+            var context = this, args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(function() {
+                func.apply(context, args);
+            }, wait);
+        };
+    }
+
+    checkGallerySlider();
+    $(window).on('resize', debounce(checkGallerySlider, 300));
+}
+
+// Инициализация при загрузке документа
+$(document).ready(function() {
+    initGalleryPageSlider();
+});
+</script>
 <?php get_footer();?>

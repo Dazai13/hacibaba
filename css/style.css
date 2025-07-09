@@ -1599,4 +1599,13 @@ width: 100%;
 .product-attributes-table{
     gap:4px;
 }
+.gallery__items{
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+}
+.gallery__item{
+    width: 100vw;
+    height: auto;
+}
 }

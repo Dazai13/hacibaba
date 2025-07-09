@@ -1,6 +1,5 @@
 function initSliders() {
     if (typeof $ === 'undefined' || typeof $.fn.slick === 'undefined') {
-        console.error('Required libraries not loaded: jQuery or Slick Slider');
         return;
     }
 
@@ -12,12 +11,10 @@ function initMainSlider() {
     var $slider = $('.intro__slider');
     
     if (!$slider.length) {
-        console.warn('Main slider element not found');
         return;
     }
 
     if ($slider.hasClass('slick-initialized')) {
-        console.warn('Main slider already initialized');
         return;
     }
 
@@ -36,9 +33,7 @@ function initMainSlider() {
 
     try {
         $slider.slick(settings);
-        console.log('Main slider successfully initialized');
     } catch (e) {
-        console.error('Main slider initialization failed:', e);
     }
 }
 
@@ -47,7 +42,7 @@ function initGallerySlider() {
     var mobileBreakpoint = 1240;
     
     if (!$gallery.length) {
-        console.warn('Gallery slider element not found');
+        
         return;
     }
 
@@ -70,18 +65,14 @@ function initGallerySlider() {
             if (!$gallery.hasClass('slick-initialized')) {
                 try {
                     $gallery.slick(mobileSettings);
-                    console.log('Gallery slider initialized');
                 } catch (e) {
-                    console.error('Gallery slider init error:', e);
                 }
             }
         } else {
             if ($gallery.hasClass('slick-initialized')) {
                 try {
                     $gallery.slick('unslick');
-                    console.log('Gallery slider destroyed');
                 } catch (e) {
-                    console.error('Gallery slider destroy error:', e);
                 }
             }
         }
