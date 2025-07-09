@@ -1121,7 +1121,7 @@ overflow: hidden;
     background: none;
     color:#988572;
     border:none;
-    width: 100%;
+    width: 80%;
     line-height: 1.6rem;
     font-size:14px;
     font-weight: 400;
@@ -1608,4 +1608,89 @@ width: 100%;
     width: 100vw;
     height: auto;
 }
+}
+.blog__wrappers{
+    display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 170px 0;
+  padding: 0 40px 70px;
+  margin:0 108px;
+}
+
+@media (max-width:1066px){
+    .blog__wrappers{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap:100px 0;
+    }
+    .blog__wrappers .blog__card{
+        width: 100%;
+    }
+
+}
+@media (max-width:767px){
+    .blog__card--mobile{
+        width: 310px;
+    }
+}
+.sweets__item-text{
+    font-family: var(--main-font);
+}
+.additionally__title{
+    font-size: 48px;
+    line-height: 55px;
+        color:#493521;
+}
+.additionally__subtitle{
+    font-family: var(--main-font);
+    font-size: 36px;
+    line-height: 42px;
+    width: 944px;
+    text-align: center;
+    margin-top: 4rem;
+    color:#493521;
+}
+.additionally__text{
+    text-align: center !important;
+    margin-top: 60px !important;
+    font-size: 28px !important;
+    line-height: 32px !important;
+    width: 100%;
+    font-weight: 700;
+    font-family: var(--main-font);
+    color:#493521;
+}
+.additionally__wrapper{
+    margin:6rem 0;
+}
+.related-posts__title{
+    margin: 50px 0;
+    width: 100%;
+    text-align: center;
+}
+.blog-post__content strong,.related-posts__title{
+    color:#493521;
+    font-size: 28px;
+    line-height: 32px;
+    font-family: var(--main-font);
+    font-weight: 700;
+}
+.blog-post__content .has-text-align-center{
+    margin-bottom: 20px;
+}
+.blog-post__content{
+    display: flex;
+    flex-direction: column;
+    gap:30px;
+    margin: 0 92px;
+}
+.blog-post__content p{
+    font-size: 16px;
+    font-family: var(--second-font);
+    line-height: 22px;
+    font-weight: 400;
+    color:#493521;
 }

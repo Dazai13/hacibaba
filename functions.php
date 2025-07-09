@@ -102,7 +102,8 @@ function enqueue_blog_scripts() {
         'blogVars',
         array(
             'templateUri' => get_template_directory_uri(),
-            'postsPageUrl' => get_permalink(get_option('page_for_posts'))
+            'postsPageUrl' => get_permalink(get_option('page_for_posts')),
+            'restUrl' => rest_url('wp/v2/')
         )
     );
 }
@@ -371,3 +372,26 @@ add_filter('woocommerce_add_to_cart_fragments', function ($fragments) {
     $fragments['.icon__shop-item'] = '<span class="icon__shop-item">' . WC()->cart->get_cart_contents_count() . '</span>';
     return $fragments;
 });
+
+add_filter('woocommerce_checkout_fields', 'custom_override_checkout_fields');
+function custom_override_checkout_fields($fields) {
+    // Изменяем поле "Имя"
+    $fields['billing']['billing_first_name']['label'] = 'Ваше имя';
+    $fields['billing']['billing_first_name']['placeholder'] = 'Введите ваше имя';
+    
+    // Добавляем новое поле
+    $fields['billing']['billing_custom_field'] = array(
+        'label' => 'Дополнительная информация',
+        'placeholder' => 'Ваши пожелания',
+        'required' => false,
+        'class' => array('form-row-wide'),
+        'clear' => true,
+        'type' => 'textarea'
+    );
+    
+    // Удаляем ненужные поля
+    unset($fields['billing']['billing_company']);
+    unset($fields['shipping']['shipping_company']);
+    
+    return $fields;
+}

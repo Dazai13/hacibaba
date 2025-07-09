@@ -2,7 +2,6 @@
     'use strict';
 
     const imageBasePath = blogVars.templateUri + '/images/';
-    console.log('Image base path:', imageBasePath); // Проверка пути
 
     // Функция debounce для оптимизации обработки resize
     function debounce(func, wait) {
@@ -16,110 +15,84 @@
         };
     }
 
+    // Определение типа устройства
+    function getDeviceType() {
+        const width = window.innerWidth;
+        if (width < 768) return 'mobile';
+        if (width < 1024) return 'tablet';
+        return 'desktop';
+    }
+
+    // Генерация HTML для карточки
+    function generateCardHTML(post, deviceType) {
+        const postImage = post.featured_image_url || imageBasePath + "blog__card-image.jpg";
+        const excerpt = post.excerpt.rendered 
+            ? post.excerpt.rendered.replace(/<[^>]+>/g, '').substring(0, 100) + '...'
+            : '';
+
+        let cardHTML = '';
+        const cardClass = `blog__card blog__card--${deviceType}`;
+        
+        if (deviceType === 'mobile') {
+            cardHTML = `
+                <div class="${cardClass}">
+                    <img src="${postImage}" alt="${post.title.rendered}" class="blog__card-image">
+                    <div class="blog__card-nav">
+                        <div class="blog__card-text">
+                            <h4>${post.title.rendered}</h4>
+                            <p>${excerpt}</p>
+                        </div>
+                    </div>
+                    <a href="${post.link}" class="blog__card-btn">читать статью</a>
+                </div>
+            `;
+        } else {
+            cardHTML = `
+                <div class="${cardClass}">
+                    <img src="${postImage}" alt="${post.title.rendered}" class="blog__card-image">
+                    <div class="blog__card-nav">
+                        <div class="blog__card-text">
+                            <h4>${post.title.rendered}</h4>
+                            <p>${excerpt}</p>
+                        </div>
+                        <a href="${post.link}" class="blog__card-btn">читать статью</a>
+                    </div>
+                </div>
+            `;
+        }
+
+        return cardHTML;
+    }
+
     // Инициализация блога
     function initBlogSection() {
         const $blogWrapper = $('.blog__wrapper');
         if (!$blogWrapper.length) return;
 
-        // Мокап данных (в реальном проекте можно заменить на AJAX-запрос)
-        const blogData = [
-            {
-                title: "История рахат-лукума",
-                excerpt: "История рахат-лукума истоки сладкого наследия...",
-                image: imageBasePath + "blog__card-image.jpg",
-                link: "/"
-            },
-            {
-                title: "История рахат-лукума",
-                excerpt: "История рахат-лукума истоки сладкого наследия...",
-                image: imageBasePath + "blog__card-image.jpg",
-                link: "/"
-            },
-            {
-                title: "История рахат-лукума",
-                excerpt: "История рахат-лукума истоки сладкого наследия...",
-                image: imageBasePath + "blog__card-image.jpg",
-                link: "/blog"
-            }
-        ];
-
-        // Функция определения типа устройства
-        function getDeviceType() {
-            const width = window.innerWidth;
-            if (width < 768) return 'mobile';
-            if (width < 1024) return 'tablet';
-            return 'desktop';
-        }
-
-        // Рендер карточек в зависимости от устройства
-        function renderCards() {
+        // Рендер карточек
+        function renderCards(posts) {
             $blogWrapper.empty();
             const deviceType = getDeviceType();
 
-            // Рендер карточек
-            blogData.forEach(item => {
-                let cardHTML = '';
-
-                if (deviceType === 'mobile') {
-                    cardHTML = `
-                        <div class="blog__card blog__card--mobile">
-                            <img src="${item.image}" alt="${item.title}" class="blog__card-image">
-                            <div class="blog__card-nav">
-                                <div class="blog__card-text">
-                                    <h4>${item.title}</h4>
-                                    <p>${item.excerpt}</p>
-                                </div>
-                            </div>
-                            <a href="${item.link}" class="blog__card-btn">читать статью</a>
-                        </div>
-                    `;
-                } else if (deviceType === 'tablet') {
-                    cardHTML = `
-                        <div class="blog__card blog__card--tablet">
-                            <img src="${item.image}" alt="${item.title}" class="blog__card-image">
-                            <div class="blog__card-nav">
-                                <div class="blog__card-text">
-                                    <h4>${item.title}</h4>
-                                    <p>${item.excerpt}</p>
-                                </div>
-                                <a href="${item.link}" class="blog__card-btn">читать статью</a>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    // Desktop version
-                    cardHTML = `
-                        <div class="blog__card blog__card--desktop">
-                            <img src="${item.image}" alt="${item.title}" class="blog__card-image">
-                            <div class="blog__card-nav">
-                                <div class="blog__card-text">
-                                    <h4>${item.title}</h4>
-                                    <p>${item.excerpt}</p>
-                                </div>
-                                <a href="${item.link}" class="blog__card-btn">читать статью</a>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                $blogWrapper.append(cardHTML);
+            // Рендерим максимум 3 карточки
+            posts.slice(0, 3).forEach(post => {
+                $blogWrapper.append(generateCardHTML(post, deviceType));
             });
 
-            // Добавляем кнопку "Читать все статьи" в конец блока
+            // Добавляем кнопку "Читать все статьи" как ссылку с сохранением стилей
             $blogWrapper.append(`
-                <div class="blog__wrapper-btn">
+                <a href="/blog" class="blog__wrapper-btn">
                     <h4>Читать все статьи</h4>
-                </div>
+                </a>
             `);
 
-            // Инициализация обработчиков событий после рендера
             initCardInteractions();
         }
 
-        // Инициализация взаимодействий с карточками
+        // Инициализация взаимодействий
         function initCardInteractions() {
+            // Клик по карточке
             $('.blog__card').on('click', function(e) {
-                // Обработка клика по карточке
                 if (!$(e.target).closest('.blog__card-btn').length) {
                     const link = $(this).find('a').attr('href');
                     if (link) window.location.href = link;
@@ -129,32 +102,75 @@
             // Ховер-эффекты для десктопа
             if (getDeviceType() === 'desktop') {
                 $('.blog__card').hover(
-                    function() {
-                        $(this).addClass('is-hovered');
-                    },
-                    function() {
-                        $(this).removeClass('is-hovered');
-                    }
+                    function() { $(this).addClass('is-hovered'); },
+                    function() { $(this).removeClass('is-hovered'); }
                 );
             }
-
-            // Обработка кнопки "Читать все статьи"
-            $('.blog__wrapper-btn').on('click', function() {
-                window.location.href = "<?php echo get_permalink(get_option('page_for_posts')); ?>";
-            });
         }
 
-        // Первоначальный рендер
-        renderCards();
+        // Загрузка изображений для постов
+        async function loadFeaturedImages(posts) {
+            const postsWithImages = await Promise.all(posts.map(async post => {
+                if (!post.featured_media) {
+                    return {
+                        ...post,
+                        featured_image_url: imageBasePath + "blog__card-image.jpg"
+                    };
+                }
 
-        // Реакция на изменение размера окна
-        $(window).on('resize', debounce(function() {
-            renderCards();
+                try {
+                    const media = await $.get(`/wp-json/wp/v2/media/${post.featured_media}`);
+                    return {
+                        ...post,
+                        featured_image_url: media.source_url
+                    };
+                } catch (error) {
+                    return {
+                        ...post,
+                        featured_image_url: imageBasePath + "blog__card-image.jpg"
+                    };
+                }
+            }));
+
+            return postsWithImages;
+        }
+
+        // Основная функция загрузки постов
+        async function loadPosts() {
+            try {
+                const posts = await $.get({
+                    url: '/wp-json/wp/v2/posts',
+                    data: {
+                        per_page: 3,
+                        _fields: 'id,title,excerpt,link,featured_media'
+                    }
+                });
+
+                const postsWithImages = await loadFeaturedImages(posts);
+                renderCards(postsWithImages);
+            } catch (error) {
+                console.error('Error loading posts:', error);
+                // Можно показать сообщение об ошибке
+            }
+        }
+
+        // Первоначальная загрузка
+        loadPosts();
+
+        // Обработка ресайза
+        $(window).on('resize', debounce(() => {
+            // Обновляем только если изменился тип устройства
+            const currentDeviceType = getDeviceType();
+            if (currentDeviceType !== window.lastDeviceType) {
+                loadPosts();
+                window.lastDeviceType = currentDeviceType;
+            }
         }, 300));
     }
 
-    // Инициализация при загрузке документа
-    $(document).ready(function() {
+    // Инициализация
+    $(document).ready(() => {
+        window.lastDeviceType = getDeviceType();
         initBlogSection();
     });
 

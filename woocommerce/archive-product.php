@@ -116,8 +116,19 @@ get_header('shop');
     <section class="additionally">
         <div class="container">
             <div class="additionally__innner inner">
-                    <h1>ДОПОЛНИТЕЛЬНО</h1>
-                    <h3>Уважаемые покупатели! Вы можете дополнительно упаковать любой товар сайта в красивую подарочную упаковку.</h3>
+                    <h1 class="additionally__title">ДОПОЛНИТЕЛЬНО</h1>
+                    <h3 class="additionally__subtitle">Уважаемые покупатели! Вы можете дополнительно упаковать любой товар сайта в красивую подарочную упаковку.</h3>
+                    <div class="additionally__wrapper">
+                        <div class="additionally__item">
+                                <img src="">
+                                <p class="card__title"></p>
+                                <p class="card__subtitle"></p>
+                                <div class="card__line line"></div>
+                                <p class="card__price"></p>
+                                <a class="card__btn">Добавить в корзину</a>
+                        </div>
+                    </div>
+                    <p class="additionally__text">Просто добавьте ее в корзину и мы все упакуем!</p>
 
             </div>
         </div>
