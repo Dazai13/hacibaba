@@ -594,11 +594,6 @@ function my_enqueue_cart_script() {
 }
 add_action('wp_enqueue_scripts', 'my_enqueue_cart_script');
 
-add_action('woocommerce_review_order_before_payment', 'custom_move_payment_methods');
-function custom_move_payment_methods() {
-    echo '<div class="checkout__payment">';
-}
-
 // Обработка AJAX-запроса для добавления товара упаковки
 add_action('wp_ajax_add_additional_product_to_cart', 'add_additional_product_to_cart');
 add_action('wp_ajax_nopriv_add_additional_product_to_cart', 'add_additional_product_to_cart');
@@ -642,3 +637,4 @@ function add_additional_product_to_cart() {
         wp_send_json_error(array('message' => $error_message));
     }
 }
+
