@@ -166,8 +166,16 @@ get_header('shop');
                                                         class="variation-button <?php echo $first_option ? 'active' : ''; ?>"
                                                         data-value="<?php echo esc_attr($option); ?>"
                                                     >
-                                                        <?php echo esc_html($option); ?>
+                                                        <?php
+                                                        if (taxonomy_exists($attribute_name)) {
+                                                            $term = get_term_by('slug', $option, $attribute_name);
+                                                            echo esc_html($term ? $term->name : $option);
+                                                        } else {
+                                                            echo esc_html($option);
+                                                        }
+                                                        ?>
                                                     </button>
+
                                                     <?php 
                                                     $first_option = false;
                                                 endforeach; 
@@ -200,6 +208,67 @@ get_header('shop');
 </section>
 </div>
 <?php get_footer('shop'); ?>
+<script>
+    jQuery(document).ready(function($) {
+    // Обработчик клика на кнопку "Добавить в корзину"
+    $('.additionally__item .add-to-cart-btn').on('click', function(e) {
+        e.preventDefault();
+        
+        // Находим родительский элемент товара
+        const $productItem = $(this).closest('.additionally__item');
+        const productId = $productItem.data('product-id');
+        
+        // Для вариативных товаров собираем выбранные атрибуты
+        let variationData = {};
+        if ($productItem.find('.variation-buttons').length) {
+            $productItem.find('.variation-buttons').each(function() {
+                const attribute = $(this).data('attribute');
+                const value = $(this).find('.variation-button.active').data('value');
+                variationData['attribute_' + attribute] = value;
+            });
+        }
+        
+        // Добавляем товар в корзину через AJAX
+        $.ajax({
+            type: 'POST',
+            url: wc_add_to_cart_params.ajax_url,
+            data: {
+                action: 'add_additional_product_to_cart',
+                product_id: productId,
+                variation_data: variationData,
+                quantity: 1
+            },
+            beforeSend: function() {
+                // Показываем индикатор загрузки (опционально)
+                $productItem.find('.add-to-cart-btn').text('Добавляем...');
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Обновляем мини-корзину
+                    $(document.body).trigger('added_to_cart', [response.fragments, response.cart_hash]);
+                    
+                    // Возвращаем исходный текст кнопки
+                    $productItem.find('.add-to-cart-btn').text('Добавлено!');
+                    
+                    // Через 2 секунды возвращаем исходный текст
+                    setTimeout(function() {
+                        $productItem.find('.add-to-cart-btn').text('Добавить в корзину');
+                    }, 2000);
+                } else {
+                    // В случае ошибки
+                    alert(response.data.message || 'Произошла ошибка при добавлении товара');
+                    $productItem.find('.add-to-cart-btn').text('Добавить в корзину');
+                }
+            },
+            error: function() {
+                alert('Ошибка соединения с сервером');
+                $productItem.find('.add-to-cart-btn').text('Добавить в корзину');
+            }
+        });
+    });
+});
+</script>
+
 <script>
 jQuery(document).ready(function($) {
 

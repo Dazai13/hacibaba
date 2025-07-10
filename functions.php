@@ -3,6 +3,7 @@ function my_theme_scripts() {
     // Подключение CSS
     wp_enqueue_style('slick-style', 'https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css');
     wp_enqueue_style('slick-theme-style', 'https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css');
+    wp_enqueue_style('dadata-theme-style', 'https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/css/suggestions.min.css');
     wp_enqueue_style('main-style', get_stylesheet_uri());
     wp_enqueue_style('custom-css', get_template_directory_uri() . '/css/style.css');
 
@@ -27,7 +28,50 @@ function my_theme_scripts() {
         false
     );
     wp_enqueue_script('slick-js');
-
+    
+// Подключение стилей и скриптов
+add_action('wp_enqueue_scripts', 'my_theme_enqueue_scripts');
+function my_theme_enqueue_scripts() {
+    // Подключаем jQuery (уже встроен в WordPress)
+    wp_enqueue_script('jquery');
+    
+    // DaData Suggestions JS + CSS
+    wp_register_script(
+        'dadata-js',
+        'https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/js/jquery.suggestions.min.js',
+        array('jquery'), // Зависит от jQuery
+        '21.12.0',
+        true // Подключаем в footer
+    );
+    wp_enqueue_script('dadata-js');
+    
+    // InputMask
+    wp_register_script(
+        'mask-js',
+        'https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.6/jquery.inputmask.min.js',
+        array('jquery'), // Зависит от jQuery
+        '5.0.6',
+        true // Подключаем в footer
+    );
+    wp_enqueue_script('mask-js');
+    
+    // Наш скрипт с инициализацией DaData
+    wp_enqueue_script(
+        'dadata-init',
+        get_template_directory_uri() . '/js/dadata.js',
+        array('jquery', 'mask-js', 'dadata-js'), // Явно указываем зависимости
+        filemtime(get_template_directory() . '/js/dadata.js'),
+        true // Подключаем в footer
+    );
+    
+    // Стили DaData (если нужны)
+    wp_enqueue_style(
+        'dadata-css',
+        'https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/css/suggestions.min.css',
+        array(),
+        '21.12.0'
+    );
+}
     wp_enqueue_script(
         'utils',
         get_template_directory_uri() . '/js/utils.js',
@@ -35,13 +79,14 @@ function my_theme_scripts() {
         filemtime(get_template_directory() . '/js/utils.js'),
         false
     );
-    wp_enqueue_script(
+        wp_enqueue_script(
         'slider',
         get_template_directory_uri() . '/js/sliders.js',
         array('jquery', 'slick-js'),
         filemtime(get_template_directory() . '/js/sliders.js'),
         false
     );
+
     wp_enqueue_script(
         'main',
         get_template_directory_uri() . '/js/main.js',
@@ -396,67 +441,204 @@ function custom_override_checkout_fields($fields) {
     return $fields;
 }
 
-// Обеспечиваем корректную обработку вариативных товаров
-add_filter('woocommerce_add_to_cart_validation', 'validate_variation_before_add', 10, 6);
-function validate_variation_before_add($passed, $product_id, $quantity, $variation_id = '', $variations = '', $cart_item_data = []) {
-    // Если товар вариативный, проверяем что вариация указана
+// В functions.php
+
+add_action('wp_ajax_find_product_variation', 'my_find_product_variation');
+add_action('wp_ajax_nopriv_find_product_variation', 'my_find_product_variation');
+
+function my_find_product_variation() {
+    // Проверяем nonce, если есть (необязательно, зависит от реализации)
+    // if ( ! isset($_POST['nonce']) || ! wp_verify_nonce($_POST['nonce'], 'your_nonce_action') ) {
+    //     wp_send_json_error('Неверный nonce');
+    // }
+
+    $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
+    $attributes = isset($_POST['attributes']) ? (array) $_POST['attributes'] : array();
+
+    if (!$product_id || empty($attributes)) {
+        wp_send_json(0); // Возвращаем 0 — вариация не найдена
+    }
+
     $product = wc_get_product($product_id);
-    if ($product && $product->is_type('variable') && empty($variation_id)) {
-        wc_add_notice(__('Пожалуйста, выберите все необходимые опции товара.', 'woocommerce'), 'error');
-        return false;
-    }
-    return $passed;
-}
 
-// Улучшаем обработку AJAX-запросов
-add_action('wp_ajax_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart');
-add_action('wp_ajax_nopriv_woocommerce_add_to_cart', 'woocommerce_ajax_add_to_cart');
-function woocommerce_ajax_add_to_cart() {
-    ob_start();
-    
-    // Проверяем nonce (защита от CSRF)
-    if (!isset($_POST['product_id'])) {
-        wp_send_json_error(['message' => 'Не указан ID товара']);
+    if (!$product || $product->get_type() !== 'variable') {
+        wp_send_json(0);
     }
 
-    $product_id = apply_filters('woocommerce_add_to_cart_product_id', absint($_POST['product_id']));
-    $quantity = empty($_POST['quantity']) ? 1 : wc_stock_amount(absint($_POST['quantity']));
+    // Попытка найти вариацию по атрибутам
     $variation_id = 0;
-    
-    // Если товар вариативный, находим нужную вариацию
-    $product = wc_get_product($product_id);
-    if ($product->is_type('variable')) {
-        $variation_attributes = [];
-        foreach ($_POST as $key => $value) {
-            if (strpos($key, 'attribute_') === 0) {
-                $variation_attributes[sanitize_title(str_replace('attribute_', '', $key))] = sanitize_text_field($value);
+
+    // Подготовим массив для поиска вариации — атрибуты без префикса "attribute_"
+    $attributes_for_search = array();
+    foreach ($attributes as $key => $value) {
+        if (strpos($key, 'attribute_') === 0) {
+            $attr_name = substr($key, 10);
+            $attributes_for_search[$attr_name] = $value;
+        }
+    }
+
+    // Перебираем все вариации
+    foreach ($product->get_children() as $child_id) {
+        $variation = wc_get_product($child_id);
+        if (!$variation || $variation->get_type() !== 'variation') {
+            continue;
+        }
+
+        $variation_attributes = $variation->get_attributes();
+
+        // Проверяем совпадение всех атрибутов
+        $matched = true;
+        foreach ($attributes_for_search as $attr_name => $attr_value) {
+            // Атрибуты вариации могут быть в разном регистре — приводим к нижнему
+            if (!isset($variation_attributes[$attr_name]) || strtolower($variation_attributes[$attr_name]) !== strtolower($attr_value)) {
+                $matched = false;
+                break;
             }
         }
-        
-        $data_store = WC_Data_Store::load('product');
-        $variation_id = $data_store->find_matching_product_variation($product, $variation_attributes);
-        
-        if (!$variation_id) {
-            wp_send_json_error(['message' => 'Не удалось найти подходящую вариацию']);
+
+        if ($matched) {
+            $variation_id = $variation->get_id();
+            break;
         }
     }
-    
-    // Добавляем в корзину
-    $cart_item_key = WC()->cart->add_to_cart($product_id, $quantity, $variation_id, $variation_attributes);
-    
-    if ($cart_item_key) {
-        do_action('woocommerce_ajax_added_to_cart', $product_id);
-        
-        // Получаем обновленные фрагменты
-        WC_AJAX::get_refreshed_fragments();
+
+    wp_send_json($variation_id);
+}
+
+add_action('wp_ajax_get_product_data', 'my_get_product_data');
+add_action('wp_ajax_nopriv_get_product_data', 'my_get_product_data');
+
+function my_get_product_data() {
+    $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
+
+    if (!$product_id) {
+        echo '<p>Товар не найден.</p>';
+        wp_die();
+    }
+
+    $product = wc_get_product($product_id);
+
+    if (!$product) {
+        echo '<p>Товар не найден.</p>';
+        wp_die();
+    }
+
+    // Формируем HTML для popup (пример)
+    ?>
+    <div class="popup-product">
+        <h2><?php echo esc_html($product->get_name()); ?></h2>
+        <div class="popup-product-image">
+            <?php echo $product->get_image('medium'); ?>
+        </div>
+        <div class="popup-product-price">
+            <?php echo $product->get_price_html(); ?>
+        </div>
+        <div class="popup-product-description">
+            <?php echo wp_kses_post($product->get_short_description()); ?>
+        </div>
+        <a href="<?php echo esc_url($product->add_to_cart_url()); ?>" class="button add-to-cart-button">
+            Добавить в корзину
+        </a>
+    </div>
+    <?php
+
+    wp_die(); // Завершаем ajax обработку
+}
+
+// В functions.php или в вашем плагине
+
+// AJAX: получить количество товаров в корзине
+add_action('wp_ajax_get_cart_count', 'get_cart_count');
+add_action('wp_ajax_nopriv_get_cart_count', 'get_cart_count');
+function get_cart_count() {
+    echo WC()->cart->get_cart_contents_count();
+    wp_die();
+}
+
+// AJAX: удалить товар из корзины по ключу
+add_action('wp_ajax_remove_from_cart', 'remove_from_cart');
+add_action('wp_ajax_nopriv_remove_from_cart', 'remove_from_cart');
+function remove_from_cart() {
+    $cart_item_key = sanitize_text_field($_POST['cart_item_key'] ?? '');
+
+    if (!$cart_item_key) {
+        wp_send_json_error('Нет ключа товара');
+        wp_die();
+    }
+
+    if (WC()->cart->remove_cart_item($cart_item_key)) {
+        WC()->cart->calculate_totals();
+        wp_send_json_success(WC()->cart->get_cart_contents_count());
     } else {
-        $error_message = wc_get_notices('error');
-        wc_clear_notices();
-        
-        if (empty($error_message)) {
-            $error_message = __('Неизвестная ошибка при добавлении в корзину', 'woocommerce');
+        wp_send_json_error('Не удалось удалить товар');
+    }
+
+    wp_die();
+}
+
+function my_enqueue_cart_script() {
+    if (is_cart()) {
+        wp_enqueue_script(
+            'my-cart-js',
+            get_template_directory_uri() . '/js/cart.js',
+            ['jquery'],
+            null,
+            false
+        );
+
+        wp_localize_script('my-cart-js', 'wc_cart_params', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('woocommerce-cart')
+        ]);
+    }
+}
+add_action('wp_enqueue_scripts', 'my_enqueue_cart_script');
+
+add_action('woocommerce_review_order_before_payment', 'custom_move_payment_methods');
+function custom_move_payment_methods() {
+    echo '<div class="checkout__payment">';
+}
+
+// Обработка AJAX-запроса для добавления товара упаковки
+add_action('wp_ajax_add_additional_product_to_cart', 'add_additional_product_to_cart');
+add_action('wp_ajax_nopriv_add_additional_product_to_cart', 'add_additional_product_to_cart');
+
+function add_additional_product_to_cart() {
+    if (!isset($_POST['product_id'])) {
+        wp_send_json_error(array('message' => 'Не указан ID товара'));
+    }
+
+    $product_id = intval($_POST['product_id']);
+    $quantity = isset($_POST['quantity']) ? intval($_POST['quantity']) : 1;
+    $variation_data = isset($_POST['variation_data']) ? $_POST['variation_data'] : array();
+    $variation_id = 0;
+
+    // Если товар вариативный, находим ID вариации
+    if (!empty($variation_data)) {
+        $product = wc_get_product($product_id);
+        if ($product && $product->is_type('variable')) {
+            $data_store = WC_Data_Store::load('product');
+            $variation_id = $data_store->find_matching_product_variation($product, $variation_data);
         }
-        
-        wp_send_json_error(['message' => is_array($error_message) ? implode(' ', $error_message) : $error_message]);
+    }
+
+    // Добавляем товар в корзину
+    $cart_item_key = WC()->cart->add_to_cart($product_id, $quantity, $variation_id, $variation_data);
+
+    if ($cart_item_key) {
+        // Возвращаем данные для обновления фрагментов корзины
+        $data = array(
+            'success' => true,
+            'fragments' => apply_filters('woocommerce_add_to_cart_fragments', array()),
+            'cart_hash' => apply_filters('woocommerce_add_to_cart_hash', WC()->cart->get_cart_for_session() ? md5(json_encode(WC()->cart->get_cart_for_session())) : '', WC()->cart->get_cart_for_session())
+        );
+        wp_send_json($data);
+    } else {
+        $error_message = 'Не удалось добавить товар в корзину';
+        if (wc_notice_count('error') > 0) {
+            $error_message = wc_get_notices('error');
+            wc_clear_notices();
+        }
+        wp_send_json_error(array('message' => $error_message));
     }
 }
