@@ -13,6 +13,7 @@ if (!defined('ABSPATH')) {
 $main_image_id = $product->get_image_id();
 $gallery_ids = $product->get_gallery_image_ids();
 ?>
+
 <div class="desktop-content">
     <div class="product__gallery ">
     <?php if ($main_image_id || !empty($gallery_ids)) : ?>

@@ -8,3 +8,15 @@
         <svg id="close"><use xlink:href="<?php echo get_template_directory_uri(); ?>/images/sprite.svg#close"></use></svg>
     </div>
 </div>
+<style>
+    .search-result-info{
+  display: flex;
+  flex-direction: column;
+  gap:10px;
+}
+.search-result-title{
+  font-size: 20px;
+  font-family: var(--main-font);
+  font-weight: 900;
+}
+</style>

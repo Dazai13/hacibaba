@@ -193,45 +193,145 @@ function enqueue_footer_scripts() {
 }
 add_action('wp_enqueue_scripts', 'enqueue_footer_scripts');
 
-add_action('wp_ajax_product_search', 'product_search_callback');
-add_action('wp_ajax_nopriv_product_search', 'product_search_callback');
+add_action('wp_ajax_product_search', 'custom_ajax_product_search');
+add_action('wp_ajax_nopriv_product_search', 'custom_ajax_product_search');
 
-function product_search_callback() {
-    $query = sanitize_text_field($_POST['query']);
-    
+function custom_ajax_product_search() {
+    $query = isset($_POST['query']) ? sanitize_text_field($_POST['query']) : '';
+
+    if (strlen($query) < 2) {
+        wp_send_json_error();
+    }
+
     $args = array(
         'post_type' => 'product',
         'posts_per_page' => 10,
         's' => $query,
-        'meta_query' => array(
-            array(
-                'key' => '_stock_status',
-                'value' => 'instock'
-            )
-        )
+        'post_status' => 'publish',
     );
-    
-    $search_query = new WP_Query($args);
-    $output = '';
-    
-    if ($search_query->have_posts()) {
-        while ($search_query->have_posts()) {
-            $search_query->the_post();
-            $product = wc_get_product(get_the_ID());
-            
-            $output .= '<a href="' . get_permalink() . '" class="search-result-item">';
-            $output .= '<div class="search-result-thumbnail">' . get_the_post_thumbnail(get_the_ID(), 'thumbnail') . '</div>';
-            $output .= '<div class="search-result-content">';
-            $output .= '<h4 class="search-result-title">' . get_the_title() . '</h4>';
-            $output .= '<div class="search-result-price">' . $product->get_price_html() . '</div>';
-            $output .= '</div>';
-            $output .= '</a>';
+
+    $products = new WP_Query($args);
+
+    if ($products->have_posts()) {
+        ob_start();
+        echo '<ul class="search-results-list">';
+        while ($products->have_posts()) {
+            $products->the_post();
+            global $product;
+
+            $product_id = get_the_ID();
+            $product_url = get_permalink($product_id);
+            $product_title = get_the_title($product_id);
+            $thumbnail = get_the_post_thumbnail($product_id, 'thumbnail');
+            $price = $product->get_price_html();
+
+            echo '<li>';
+            echo '<a href="' . esc_url($product_url) . '" class="search-result-item" data-product-id="' . esc_attr($product_id) . '">';
+            echo $thumbnail;
+            echo '<span class="search-result-info">';
+            echo '<span class="search-result-title">' . esc_html($product_title) . '</span>';
+            echo '<span class="search-result-price">' . $price . '</span>';
+            echo '</span>';
+            echo '</a>';
+            echo '</li>';
         }
+        echo '</ul>';
         wp_reset_postdata();
-        wp_send_json_success($output);
+
+        $html = ob_get_clean();
+        wp_send_json_success($html);
     } else {
-        wp_send_json_error('Ничего не найдено');
+        wp_send_json_error();
     }
+
+    wp_die();
+}
+
+add_action('wp_ajax_get_product_popup_content', 'get_product_popup_content');
+add_action('wp_ajax_nopriv_get_product_popup_content', 'get_product_popup_content');
+
+function get_product_popup_content() {
+    $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
+    
+    if (!$product_id) {
+        wp_send_json_error('Не указан ID товара');
+    }
+
+    $product = wc_get_product($product_id);
+    
+    if (!$product) {
+        wp_send_json_error('Товар не найден');
+    }
+
+    ob_start();
+    ?>
+    <!-- Убрали обертку popup-content, так как она будет добавлена в JS -->
+    <div class="popup-content">
+        <div class="desktop-content">
+            <div class="product" data-product_id="<?php echo $product_id; ?>">
+                <!-- Остальной контент popup'а -->
+                <?php 
+                $main_image_id = $product->get_image_id();
+                $gallery_ids = $product->get_gallery_image_ids();
+                ?>
+                
+                <?php if ($main_image_id || !empty($gallery_ids)) : ?>
+                    <div class="popup-product-gallery-exclusive">
+                        <!-- Главное изображение -->
+                        <div class="exclusive-main-image">
+                            <?php if ($main_image_id) : ?>
+                                <?php echo wp_get_attachment_image($main_image_id, 'large', false, [
+                                    'class' => 'current-main-image',
+                                    'data-id' => $main_image_id
+                                ]); ?>
+                            <?php endif; ?>
+                            <button class="exclusive-prev">←</button>
+                            <button class="exclusive-next">→</button>
+                        </div>
+
+                        <!-- Галерея -->
+                        <div class="exclusive-gallery-thumbs">
+                            <?php foreach ($gallery_ids as $image_id) : ?>
+                                <div class="exclusive-thumb" data-id="<?php echo $image_id; ?>">
+                                    <?php echo wp_get_attachment_image($image_id, 'thumbnail'); ?>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
+                <h2><?php echo $product->get_name(); ?></h2>
+                <div class="price"><?php echo $product->get_price_html(); ?></div>
+                <div class="description"><?php echo $product->get_description(); ?></div>
+                
+                <?php if ($product->get_attributes()) : ?>
+                    <div class="product-attributes">
+                        <?php foreach ($product->get_attributes() as $attribute) : ?>
+                            <div class="attribute">
+                                <strong><?php echo wc_attribute_label($attribute->get_name()); ?>:</strong>
+                                <span><?php echo $product->get_attribute($attribute->get_name()); ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+                
+                <button class="single_add_to_cart_button button alt">
+                    <?php echo esc_html($product->single_add_to_cart_text()); ?>
+                </button>
+            </div>
+        </div>
+        
+        <div class="mobile-content">
+            <!-- Мобильная версия -->
+            <div class="product" data-product_id="<?php echo $product_id; ?>">
+                <!-- Контент мобильной версии -->
+            </div>
+        </div>
+    </div>
+    <?php
+    $content = ob_get_clean();
+    
+    wp_send_json_success($content);
 }
 
 // Удаление обработки якорных ссылок
@@ -803,3 +903,31 @@ function create_custom_order() {
     wp_die();
 }
 
+add_action('wp_ajax_get_product_popup_template', 'get_product_popup_template');
+add_action('wp_ajax_nopriv_get_product_popup_template', 'get_product_popup_template');
+
+function get_product_popup_template() {
+    $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
+    
+    if (!$product_id) {
+        wp_send_json_error('Не указан ID товара');
+    }
+
+    $product = wc_get_product($product_id);
+    
+    if (!$product) {
+        wp_send_json_error('Товар не найден');
+    }
+
+    // Используем output buffering для захвата шаблона
+    ob_start();
+    
+    // Подключаем ваш шаблон popup
+    wc_get_template('product-popup-template.php', array(
+        'product' => $product
+    ));
+    
+    $content = ob_get_clean();
+    
+    wp_send_json_success($content);
+}
