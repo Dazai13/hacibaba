@@ -3,10 +3,11 @@ function my_theme_scripts() {
     // Подключение CSS
     wp_enqueue_style('slick-style', 'https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css');
     wp_enqueue_style('slick-theme-style', 'https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css');
-    wp_enqueue_style('dadata-theme-style', 'https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/css/suggestions.min.css');
     wp_enqueue_style('main-style', get_stylesheet_uri());
+    wp_enqueue_script('dadata-suggest', 'https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/js/jquery.suggestions.min.js', array('jquery'), null, false);
+    wp_enqueue_style('dadata-style', 'https://cdn.jsdelivr.net/npm/suggestions-jquery@21.12.0/dist/css/suggestions.min.css');
     wp_enqueue_style('custom-css', get_template_directory_uri() . '/css/style.css');
-
+    
     // Подключение скриптов
     if (!is_admin()) {
         wp_deregister_script('jquery');
@@ -636,5 +637,169 @@ function add_additional_product_to_cart() {
         }
         wp_send_json_error(array('message' => $error_message));
     }
+}
+
+
+// Полная очистка корзины
+add_action('wp_ajax_clear_cart', 'clear_cart');
+add_action('wp_ajax_nopriv_clear_cart', 'clear_cart');
+function clear_cart() {
+    try {
+        if (!wp_verify_nonce($_POST['_wpnonce'], 'woocommerce-cart')) {
+            throw new Exception('Неверный nonce');
+        }
+
+        $cart = WC()->cart;
+        
+        // Полная очистка корзины
+        $cart->empty_cart(true);
+        
+        // Очистка сессии
+        WC()->session->set('cart', array());
+        WC()->session->set('cart_totals', array());
+        WC()->session->set('applied_coupons', array());
+        WC()->session->set('coupon_discount_totals', array());
+        WC()->session->set('coupon_discount_tax_totals', array());
+        WC()->session->set('removed_cart_contents', array());
+        
+        // Пересчёт итогов
+        $cart->calculate_totals();
+        
+        // Очистка кеша
+        if (function_exists('wp_cache_delete')) {
+            wp_cache_delete('wc_cart_' . $cart->get_cart_hash(), 'wc_cart_id');
+        }
+        
+        wp_send_json_success(array(
+            'count' => 0,
+            'total' => wc_price(0),
+            'message' => 'Корзина успешно очищена'
+        ));
+        
+    } catch (Exception $e) {
+        wp_send_json_error(array(
+            'message' => $e->getMessage()
+        ));
+    }
+    
+    wp_die();
+}
+
+// Обновление фрагментов корзины
+add_action('wp_ajax_update_cart_fragments', 'update_cart_fragments');
+add_action('wp_ajax_nopriv_update_cart_fragments', 'update_cart_fragments');
+function update_cart_fragments() {
+    try {
+        if (!wp_verify_nonce($_POST['_wpnonce'], 'woocommerce-cart')) {
+            throw new Exception('Неверный nonce');
+        }
+
+        $cart = WC()->cart;
+        $fragments = array();
+        
+        // Счётчик товаров
+        $fragments['span.cart-count'] = '<span class="cart-count">' . $cart->get_cart_contents_count() . '</span>';
+        
+        // Итоговая сумма
+        $fragments['div.cart-total'] = '<div class="cart-total">' . $cart->get_total() . '</div>';
+        
+        // Подсчёт товаров
+        $fragments['div.cart-subtotal'] = '<div class="cart-subtotal">' . wc_price($cart->get_subtotal()) . '</div>';
+        
+        // Кнопка корзины
+        $fragments['a.cart-contents'] = '<a href="' . wc_get_cart_url() . '" class="cart-contents">' 
+            . sprintf(_n('%d item', '%d items', $cart->get_cart_contents_count(), 'woocommerce'), $cart->get_cart_contents_count())
+            . ' - ' . $cart->get_total() . '</a>';
+        
+        wp_send_json_success(array(
+            'fragments' => $fragments,
+            'cart_hash' => $cart->get_cart_hash()
+        ));
+        
+    } catch (Exception $e) {
+        wp_send_json_error(array(
+            'message' => $e->getMessage()
+        ));
+    }
+    
+    wp_die();
+}
+
+// Создание кастомного заказа
+add_action('wp_ajax_create_custom_order', 'create_custom_order');
+add_action('wp_ajax_nopriv_create_custom_order', 'create_custom_order');
+function create_custom_order() {
+    try {
+        // Валидация данных
+        $required_fields = array(
+            'customer_name' => 'Имя',
+            'customer_phone' => 'Телефон',
+            'customer_address' => 'Адрес'
+        );
+        
+        foreach ($required_fields as $field => $name) {
+            if (empty($_POST[$field])) {
+                throw new Exception("Поле {$name} обязательно для заполнения");
+            }
+        }
+        
+        // Создание заказа
+        $order = wc_create_order();
+        
+        // Добавление товаров из корзины
+        foreach (WC()->cart->get_cart() as $cart_item) {
+            $order->add_product(
+                $cart_item['data'],
+                $cart_item['quantity'],
+                array(
+                    'variation' => $cart_item['variation'],
+                    'totals' => array(
+                        'subtotal' => $cart_item['line_subtotal'],
+                        'total' => $cart_item['line_total']
+                    )
+                )
+            );
+        }
+        
+        // Установка адреса
+        $address = array(
+            'first_name' => sanitize_text_field($_POST['customer_name']),
+            'phone'      => sanitize_text_field($_POST['customer_phone']),
+            'address_1'  => sanitize_text_field($_POST['customer_address']),
+            'country'    => sanitize_text_field($_POST['country_code'] ?? 'RU')
+        );
+        
+        $order->set_address($address, 'billing');
+        $order->set_address($address, 'shipping');
+        
+        // Дополнительные поля
+        if (!empty($_POST['customer_notes'])) {
+            $order->set_customer_note(sanitize_textarea_field($_POST['customer_notes']));
+        }
+        
+        // Метод оплаты и доставки
+        $order->set_payment_method('bacs');
+        $order->set_payment_method_title('Прямой банковский перевод');
+        $order->set_shipping_total(0);
+        
+        // Сохранение
+        $order->calculate_totals();
+        $order->update_status('processing', 'Заказ создан через кастомную форму');
+        
+        // Очистка корзины
+        WC()->cart->empty_cart();
+        
+        wp_send_json_success(array(
+            'order_id' => $order->get_id(),
+            'message' => 'Заказ успешно создан'
+        ));
+        
+    } catch (Exception $e) {
+        wp_send_json_error(array(
+            'message' => $e->getMessage()
+        ));
+    }
+    
+    wp_die();
 }
 

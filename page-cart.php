@@ -277,50 +277,237 @@ get_header('shop'); ?>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    const popup = document.getElementById('checkout-popup');
-    const closeButton = document.getElementById('close-popup');
-    const overlay = document.querySelector('.checkout-popup-overlay');
-    const paymentForm = document.getElementById('payment-form');
-    const returnToShopBtn = document.getElementById('return-to-shop');
-    const cardNumberInput = document.getElementById('card-number');
-    const cardExpiryInput = document.getElementById('card-expiry');
-    const submitButton = document.getElementById('submit-payment');
-    const openPopupBtn = document.getElementById('open-checkout-popup');
+document.addEventListener('DOMContentLoaded', function() {
+    const citySelect = document.getElementById('customer_address');
+    const sdekInput = document.getElementById('sdek_address');
+    const token = '4abf47bcb873b0c8a1051c12c76b1dc98fa3359f'; // Замените на ваш API-ключ DaData
 
-    // Функция открытия popup
-    function openCheckoutPopup() {
-        if (popup) {
-            popup.style.display = 'block';
-            document.body.style.overflow = 'hidden';
-            document.querySelector('.step[data-step="1"]').classList.add('active');
-            document.querySelector('.step[data-step="2"]').classList.remove('active');
-            document.getElementById('step-1-content').style.display = 'block';
-            document.getElementById('step-2-content').style.display = 'none';
-        }
-    }
-
-    // Функция закрытия popup
-    function closeCheckoutPopup() {
-        if (popup) {
-            popup.style.display = 'none';
-            document.body.style.overflow = '';
-        }
-    }
-
-    // Навешиваем обработчики
-    if (closeButton) closeButton.addEventListener('click', closeCheckoutPopup);
-    if (overlay) overlay.addEventListener('click', closeCheckoutPopup);
-    if (openPopupBtn) openPopupBtn.addEventListener('click', openCheckoutPopup);
-
-    const popupContent = document.querySelector('.checkout-popup-content');
-    if (popupContent) {
-        popupContent.addEventListener('click', function (e) {
-            e.stopPropagation();
+    // 1. Загрузка городов с пунктами СДЭК
+    function loadSdekCities() {
+        // Пример запроса к API СДЭК (используйте реальный API СДЭК)
+        fetch('https://api.cdek.ru/v2/location/cities?country_codes=RU', {
+            headers: {
+                'Authorization': 'Bearer YOUR_CDEK_API_KEY' // Замените на ключ СДЭК
+            }
+        })
+        .then(response => response.json())
+        .then(cities => {
+            // Очищаем и заполняем select
+            citySelect.innerHTML = '<option value="">Выберите город</option>';
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city.city;
+                option.textContent = city.city;
+                citySelect.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Ошибка загрузки городов:', error);
+            // Fallback: используем DaData, если API СДЭК недоступен
+            initDaDataCitySuggest();
         });
     }
 
-    // Форматирование ввода номера карты
+    // 2. Инициализация подсказок для городов через DaData
+    function initDaDataCitySuggest() {
+        $("#customer_address").suggestions({
+            token: token,
+            type: "ADDRESS",
+            hint: false,
+            bounds: "city",
+            constraints: {
+                locations: { country: "RU" }
+            },
+            onSelect: function(suggestion) {
+                // При выборе города активируем поле адреса СДЭК
+                sdekInput.disabled = false;
+                initDaDataSdekSuggest(suggestion.data.city);
+            }
+        });
+    }
+
+    // 3. Подсказки для пунктов СДЭК в выбранном городе
+    function initDaDataSdekSuggest(city) {
+        $("#sdek_address").suggestions({
+            token: token,
+            type: "PARTY",
+            hint: false,
+            constraints: {
+                locations: { city: city },
+                party_type: "PICKUP_POINT", // Только пункты выдачи
+                restrict_value: true
+            },
+            onSelect: function(suggestion) {
+                // Автозаполнение полного адреса
+                sdekInput.value = suggestion.value;
+            }
+        });
+    }
+
+    // Инициализация при загрузке
+    loadSdekCities();
+
+    // Обработчик изменения города
+    citySelect.addEventListener('change', function() {
+        if (this.value) {
+            sdekInput.disabled = false;
+            initDaDataSdekSuggest(this.value);
+        } else {
+            sdekInput.disabled = true;
+            sdekInput.value = '';
+        }
+    });
+});
+</script>
+<?php endif; ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const phoneInput = document.getElementById('customer_phone');
+    const countryCodeSelect = document.getElementById('country_code');
+    
+    // Маски для разных кодов стран
+    const phoneMasks = {
+        '7': { mask: '(###) ###-##-##', placeholder: '(999) 123-45-67' },
+        '380': { mask: '(##) ###-##-##', placeholder: '(99) 123-45-67' },
+        '375': { mask: '(##) ###-##-##', placeholder: '(99) 123-45-67' },
+        '77': { mask: '(###) ###-##-##', placeholder: '(999) 123-45-67' },
+        '1': { mask: '(###) ###-####', placeholder: '(999) 123-4567' },
+        '44': { mask: '(####) ###-###', placeholder: '(9123) 456-789' },
+        '49': { mask: '(####) ###-###', placeholder: '(9123) 456-789' },
+        '33': { mask: '(##) ##-##-##-##', placeholder: '(12) 34-56-78-90' },
+        '86': { mask: '(####) ####-####', placeholder: '(9123) 4567-8910' }
+    };
+
+    // Установка маски при загрузке
+    updatePhoneMask();
+
+    // Обработчик изменения кода страны
+    countryCodeSelect.addEventListener('change', updatePhoneMask);
+
+    // Обработчик ввода телефона
+    phoneInput.addEventListener('input', formatPhoneInput);
+    phoneInput.addEventListener('keydown', handlePhoneBackspace);
+
+    function updatePhoneMask() {
+        const countryCode = countryCodeSelect.value;
+        const maskData = phoneMasks[countryCode] || phoneMasks['7']; // По умолчанию +7
+        
+        // Обновляем плейсхолдер
+        phoneInput.placeholder = maskData.placeholder;
+        
+        // Если поле уже содержит значение, переформатируем его
+        if (phoneInput.value) {
+            formatPhoneInput({ target: phoneInput });
+        }
+    }
+
+    function formatPhoneInput(e) {
+        const input = e.target;
+        const countryCode = countryCodeSelect.value;
+        const maskData = phoneMasks[countryCode] || phoneMasks['7'];
+        const mask = maskData.mask;
+        
+        // Получаем только цифры из ввода
+        let numbers = input.value.replace(/\D/g, '');
+        let result = '';
+        let charIndex = 0;
+        
+        // Форматируем по маске
+        for (let i = 0; i < mask.length; i++) {
+            if (charIndex >= numbers.length) break;
+            
+            if (mask[i] === '#') {
+                result += numbers[charIndex];
+                charIndex++;
+            } else {
+                result += mask[i];
+            }
+        }
+        
+        // Устанавливаем отформатированное значение
+        input.value = result;
+    }
+
+    function handlePhoneBackspace(e) {
+        // Обрабатываем backspace правильно
+        if (e.key === 'Backspace') {
+            e.preventDefault();
+            const input = e.target;
+            const cursorPosition = input.selectionStart;
+            
+            // Если курсор в конце - просто удаляем последний символ
+            if (cursorPosition === input.value.length) {
+                input.value = input.value.slice(0, -1);
+            } 
+            // Иначе удаляем символ перед курсором
+            else if (cursorPosition > 0) {
+                input.value = input.value.substring(0, cursorPosition - 1) + 
+                             input.value.substring(cursorPosition);
+                input.setSelectionRange(cursorPosition - 1, cursorPosition - 1);
+            }
+        }
+    }
+});
+</script>
+<script>
+window.addEventListener('load', function () {
+    // Элементы DOM
+    const popup = document.getElementById('checkout-popup');
+    const closeButton = document.getElementById('close-popup');
+    const overlay = document.querySelector('.checkout-popup-overlay');
+    const openPopupBtn = document.getElementById('open-checkout-popup');
+    const submitButton = document.getElementById('submit-payment');
+    const returnToShopBtn = document.getElementById('return-to-shop');
+    const cardNumberInput = document.getElementById('card-number');
+    const cardExpiryInput = document.getElementById('card-expiry');
+    const clearCartBtn = document.getElementById('clear-cart-btn');
+
+    // Валидация формы
+    function validateCheckoutForm() {
+        const requiredFields = [
+            document.getElementById('customer_name'),
+            document.getElementById('customer_phone'),
+            document.getElementById('customer_address'),
+            document.getElementById('sdek_address')
+        ];
+
+        let isValid = true;
+
+        for (const field of requiredFields) {
+            if (!field || !field.value.trim()) {
+                field.classList.add('field-error');
+                isValid = false;
+            } else {
+                field.classList.remove('field-error');
+            }
+        }
+
+        if (!isValid) {
+            alert('Пожалуйста, заполните все обязательные поля');
+        }
+
+        return isValid;
+    }
+
+    // Открытие попапа
+    function openCheckoutPopup() {
+        if (!validateCheckoutForm()) return;
+
+        popup.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        document.querySelector('.step[data-step="1"]').classList.add('active');
+        document.querySelector('.step[data-step="2"]').classList.remove('active');
+        document.getElementById('step-1-content').style.display = 'block';
+        document.getElementById('step-2-content').style.display = 'none';
+    }
+
+    // Закрытие попапа
+    function closeCheckoutPopup() {
+        popup.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    // Форматирование номера карты
     if (cardNumberInput) {
         cardNumberInput.addEventListener('input', function (e) {
             let value = e.target.value.replace(/\s+/g, '');
@@ -331,7 +518,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Форматирование ввода срока действия
+    // Форматирование срока действия карты
     if (cardExpiryInput) {
         cardExpiryInput.addEventListener('input', function (e) {
             let value = e.target.value.replace(/\D/g, '');
@@ -342,11 +529,107 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Обработка кнопки "Оплатить"
+    // Функция полной очистки корзины
+    function clearEntireCart() {
+        return new Promise((resolve, reject) => {
+            fetch(wc_cart_params.ajax_url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Cache-Control': 'no-cache'
+                },
+                body: new URLSearchParams({
+                    action: 'clear_cart',
+                    _wpnonce: wc_cart_params.nonce,
+                    force_clear: 'yes'
+                })
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Network response was not ok');
+                return res.json();
+            })
+            .then(response => {
+                if (response.success) {
+                    console.log('✅ Корзина полностью очищена');
+                    updateCartElements();
+                    resolve(true);
+                } else {
+                    console.error('❌ Ошибка очистки корзины:', response.data);
+                    throw new Error(response.data || 'Ошибка очистки корзины');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Ошибка запроса:', error);
+                reject(error);
+            });
+        });
+    }
+
+    // Удаление одного товара из корзины
+    function removeCartItem(cartItemKey) {
+        fetch(wc_cart_params.ajax_url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                action: 'remove_from_cart',
+                cart_item_key: cartItemKey,
+                _wpnonce: wc_cart_params.nonce
+            })
+        })
+        .then(res => res.json())
+        .then(response => {
+            if (response.success) {
+                console.log('✅ Товар удален из корзины');
+                document.querySelector(`.cart_item[data-cart_item_key="${cartItemKey}"]`)?.remove();
+                updateCartElements();
+            } else {
+                console.error('❌ Ошибка удаления товара:', response.data);
+                alert('Не удалось удалить товар');
+            }
+        })
+        .catch(error => {
+            console.error('❌ Ошибка запроса:', error);
+            alert('Ошибка при обращении к серверу');
+        });
+    }
+
+    // Обновление элементов корзины
+    function updateCartElements() {
+        fetch(wc_cart_params.ajax_url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+                action: 'update_cart_fragments',
+                _wpnonce: wc_cart_params.nonce
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.fragments) {
+                // Обновляем все фрагменты на странице
+                for (const [key, value] of Object.entries(data.fragments)) {
+                    const element = document.querySelector(key);
+                    if (element) {
+                        element.outerHTML = value;
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка обновления корзины:', error);
+        });
+    }
+
+    // Обработка отправки формы оплаты
     if (submitButton) {
         submitButton.addEventListener('click', function (e) {
             e.preventDefault();
 
+            // Валидация данных карты
             const cardNumber = cardNumberInput.value.replace(/\s+/g, '');
             const cardExpiry = cardExpiryInput.value;
             const cardCvc = document.getElementById('card-cvc').value;
@@ -372,48 +655,102 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            // Переход на шаг 2
-            document.querySelector('.step[data-step="1"]').classList.remove('active');
-            document.querySelector('.step[data-step="2"]').classList.add('active');
-            document.getElementById('step-1-content').style.display = 'none';
-            document.getElementById('step-2-content').style.display = 'block';
+            // Данные заказа
+            const orderData = {
+                action: 'create_custom_order',
+                customer_name: document.getElementById('customer_name').value,
+                customer_phone: document.getElementById('customer_phone').value,
+                country_code: document.getElementById('country_code').value,
+                customer_address: document.getElementById('customer_address').value,
+                sdek_address: document.getElementById('sdek_address').value,
+                customer_notes: document.getElementById('customer_notes').value
+            };
 
-            // Имитация обработки платежа
-            setTimeout(function () {
-                const statusIcon = document.querySelector('.status-icon');
-                if (statusIcon) {
-                    statusIcon.classList.remove('loading');
-                    statusIcon.classList.add('success');
+            // Отправка заказа
+            fetch('/wp-admin/admin-ajax.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams(orderData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    // Переход к шагу успешного оформления
+                    document.querySelector('.step[data-step="1"]').classList.remove('active');
+                    document.querySelector('.step[data-step="2"]').classList.add('active');
+                    document.getElementById('step-1-content').style.display = 'none';
+                    document.getElementById('step-2-content').style.display = 'block';
+
+                    // Анимация успешного оформления
+                    setTimeout(() => {
+                        const statusIcon = document.querySelector('.status-icon');
+                        if (statusIcon) {
+                            statusIcon.classList.remove('loading');
+                            statusIcon.classList.add('success');
+                        }
+
+                        document.querySelector('.status-title').textContent = 'Оплата прошла успешно!';
+                        document.querySelector('.status-message').textContent = 'Ваш заказ оформлен. Спасибо за покупку!';
+
+                        // Очистка корзины
+                        clearEntireCart()
+                            .then(() => {
+                                // Дополнительные действия после очистки
+                                if (typeof updateCheckoutFragment !== 'undefined') {
+                                    updateCheckoutFragment();
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Ошибка при очистке корзины:', error);
+                            });
+                    }, 2000);
+                } else {
+                    alert('Ошибка: ' + (result.data || 'Не удалось создать заказ'));
                 }
-
-                document.querySelector('.status-title').textContent = 'Оплата прошла успешно!';
-                document.querySelector('.status-message').textContent = 'Ваш заказ оформлен. Спасибо за покупку!';
-
-                // Очистка корзины WooCommerce
-                if (typeof wc_checkout_params !== 'undefined') {
-                    fetch(wc_checkout_params.ajax_url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: 'action=woocommerce_clear_cart&security=' + wc_checkout_params.clear_cart_nonce
-                    });
-                }
-            }, 2000);
+            }).catch(err => {
+                alert('Ошибка отправки данных: ' + err.message);
+            });
         });
     }
 
-    // Кнопка "Вернуться в магазин"
-    if (returnToShopBtn) {
-        returnToShopBtn.addEventListener('click', function () {
-            closeCheckoutPopup();
-            window.location.href = '/';
+    // Обработчики событий
+    if (closeButton) closeButton.addEventListener('click', closeCheckoutPopup);
+    if (overlay) overlay.addEventListener('click', closeCheckoutPopup);
+    if (openPopupBtn) openPopupBtn.addEventListener('click', openCheckoutPopup);
+    if (returnToShopBtn) returnToShopBtn.addEventListener('click', () => {
+        closeCheckoutPopup();
+        window.location.href = '/';
+    });
+
+    // Обработчик кнопки очистки корзины
+    if (clearCartBtn) {
+        clearCartBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (confirm('Вы действительно хотите очистить корзину?')) {
+                clearEntireCart();
+            }
+        });
+    }
+
+    // Обработчики для кнопок удаления товаров
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-from-cart')) {
+            const cartItemKey = e.target.dataset.cartItemKey;
+            if (cartItemKey) {
+                removeCartItem(cartItemKey);
+            }
+        }
+    });
+
+    // Предотвращение закрытия при клике на контент попапа
+    const popupContent = document.querySelector('.checkout-popup-content');
+    if (popupContent) {
+        popupContent.addEventListener('click', function (e) {
+            e.stopPropagation();
         });
     }
 });
 </script>
-
-
-<?php endif; ?>
-
 <script>
 jQuery(document).ready(function($) {
     function checkScreenSize() {
@@ -468,6 +805,5 @@ jQuery(document).ready(function($) {
     });
 });
 </script>
-
 <?php do_action('woocommerce_after_cart'); ?>
 <?php get_footer('shop'); ?>
